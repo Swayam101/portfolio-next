@@ -1,26 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lora:ital,wght@0,600;1,400&family=Montserrat:ital,wght@0,100..900;1,100..900&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Theme palette — use only these colors across the codebase
+   * frozen-water: backgrounds, surfaces
+   * pacific-blue: secondary accents, paths, strokes
+   * yale-blue: primary text, strong accents, icons
+   * pale-sky: soft highlights, alternate backgrounds
+   * fresh-sky: tertiary accents, nav links
+   */
+  --frozen-water: #bee9e8ff;
+  --pacific-blue: #62b6cbff;
+  --yale-blue: #1b4965ff;
+  --pale-sky: #cae9ffff;
+  --fresh-sky: #5fa8d3ff;
+
+  /* RGB values for rgba() / opacity usage */
+  --yale-blue-rgb: 27, 73, 101;
+  --pacific-blue-rgb: 98, 182, 203;
+  --fresh-sky-rgb: 95, 168, 211;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.sn-pro {
+  font-family: "SN Pro", sans-serif;
+  font-optical-sizing: auto;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Header & sidebar nav link hover animations */
+.header-nav-link {
+  position: relative;
+  transition: color 0.25s ease;
+}
+.header-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0;
+  height: 1.5px;
+  background: var(--pacific-blue);
+  transition: width 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.header-nav-link:hover {
+  color: var(--pacific-blue);
+}
+.header-nav-link:hover::after {
+  width: 100%;
+}
+
+/* #### AmericaN History Font Family #### */
+@font-face {
+  font-family: 'AmericaN History Regular';
+  font-style: normal;
+  font-weight: normal;
+  src: local('AmericaN History Regular'), url('/fonts/american.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'AmericaN History Dot';
+  font-style: normal;
+  font-weight: normal;
+  src: local('AmericaN History Dot'), url('/fonts/american-dot.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'AmericaN History Star';
+  font-style: normal;
+  font-weight: normal;
+  src: local('AmericaN History Star'), url('/fonts/american-star.ttf') format('truetype');
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+*  {
+    box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'AmericaN History Regular', sans-serif;
+  background-color: var(--frozen-water);
+}
+
+.btn-3d{
+  box-shadow: rgb(255, 255, 255) 0px 5px 0px 0px;
+  transition: all 0.3s ease;
+}
+.btn-3d:active{
+  box-shadow: none;
+  transform: translateY(5px);
+
 }
