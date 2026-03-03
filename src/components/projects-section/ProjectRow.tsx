@@ -137,17 +137,7 @@ export const ProjectRow = memo(function ProjectRow({
               LIVE <ProjectIconArrow color="var(--yale-blue)" />
             </a>
           )}
-          {project.repo && (
-            <a
-              href={project.repo}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="font-['Bebas_Neue'] text-[0.75rem] tracking-[0.18em] text-[var(--fresh-sky)] no-underline flex items-center gap-[0.3rem]"
-            >
-              REPO <ProjectIconArrow color="var(--fresh-sky)" />
-            </a>
-          )}
+     
         </div>
       </div>
     </div>

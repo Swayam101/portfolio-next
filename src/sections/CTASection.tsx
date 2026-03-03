@@ -3,6 +3,7 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import BounceInScale from "../components/ui/BounceInScale";
+import { scrollToSection } from "../utils/scrollToSection";
 
 const CTASection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -66,7 +67,8 @@ const CTASection: React.FC = () => {
 
         <BounceInScale as="div" start="top 75%" duration={0.9} delay={0.45}>
           <a
-            href="mailto:swayamprajapat21@gmail.com"
+            href="#contact-form"
+            onClick={(e) => { e.preventDefault(); scrollToSection("contact-form"); }}
             className="text-2xl font-black tracking-wide rounded-xl px-6 py-4
               bg-[var(--pale-sky)]
               text-[var(--yale-blue)]
@@ -82,8 +84,6 @@ const CTASection: React.FC = () => {
             Hit Me Up
           </a>
         </BounceInScale>
-
-
 
       </div>
 
