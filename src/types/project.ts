@@ -15,4 +15,6 @@ export interface Project {
   response?: string;
   /** Technical specs: area, materials, services */
   specs?: string;
+  /** Preview screenshot — drop a .webp in /public/images/ and reference it here */
+  image?: string;
 }

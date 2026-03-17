@@ -18,6 +18,7 @@ const MY_PROJECTS: Project[] = [
     response:
       "Designed a modular architecture with separate flows for owners and sitters. Implemented Stripe for payments, MongoDB for flexible document storage, and a responsive UI that works across devices. Key decisions included using Next.js API routes for serverless backend logic and Tailwind for rapid UI development.",
     specs: "Full-stack web app • Next.js, Node.js, MongoDB, Stripe • 2024",
+    image: "https://res.cloudinary.com/dqlcat7kj/image/upload/v1773778231/fetchmate_vo1ea2.webp",
   },
   {
     id: 2,
@@ -36,6 +37,7 @@ const MY_PROJECTS: Project[] = [
     response:
       "Integrated Solana wallet adapter for authentication, built a credit staking mechanism, and connected OpenAI API with custom system prompts per agent. PostgreSQL stores conversation history and user credits. The architecture separates Web3 logic from the chat layer for maintainability.",
     specs: "Web3 + AI • Solana, Web3.js, Node.js, OpenAI, PostgreSQL • 2024",
+    image: "https://res.cloudinary.com/dqlcat7kj/image/upload/v1773778231/sschatzapp_ofyuac.webp",
   },
   // {
   //   id: 3,
@@ -72,6 +74,7 @@ const MY_PROJECTS: Project[] = [
     response:
       "Used Next.js for SSR and static optimization, MongoDB for flexible product data, Stripe for payments. Implemented image optimization, lazy loading, and a minimal UI that keeps focus on the products. Deployed on Vercel for edge performance.",
     specs: "E-commerce • Next.js, Node.js, MongoDB, Stripe, Vercel • 2023",
+    image: "https://res.cloudinary.com/dqlcat7kj/image/upload/v1773778231/eleve_uyv0qb.webp",
   },
 ];
 
