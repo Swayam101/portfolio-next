@@ -54,8 +54,8 @@ export const metadata: Metadata = {
     canonical: "https://www.swayam.space",
   },
   icons: {
-    icon: "/favicon.webp",
-    apple: "/favicon.webp",
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
   },
 };
 
