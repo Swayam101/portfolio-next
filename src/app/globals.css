@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lora:ital,wght@0,600;1,400&family=Montserrat:ital,wght@0,100..900;1,100..900&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -53,6 +52,7 @@
   font-family: 'AmericaN History Regular';
   font-style: normal;
   font-weight: normal;
+  font-display: swap;
   src: local('AmericaN History Regular'), url('/fonts/american.ttf') format('truetype');
 }
 
@@ -60,6 +60,7 @@
   font-family: 'AmericaN History Dot';
   font-style: normal;
   font-weight: normal;
+  font-display: swap;
   src: local('AmericaN History Dot'), url('/fonts/american-dot.ttf') format('truetype');
 }
 
@@ -67,6 +68,7 @@
   font-family: 'AmericaN History Star';
   font-style: normal;
   font-weight: normal;
+  font-display: swap;
   src: local('AmericaN History Star'), url('/fonts/american-star.ttf') format('truetype');
 }
 

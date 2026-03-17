@@ -186,7 +186,12 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lora:ital,wght@0,600;1,400&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap"
+        />
         <link rel="preload" href="/astronaut.webp" as="image" />
+        <link rel="preload" href="/isit2.webp" as="image" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
