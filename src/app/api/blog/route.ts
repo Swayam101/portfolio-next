@@ -6,12 +6,12 @@ import { parseBlogYaml } from "@/lib/parseBlogYaml";
 export async function POST(req: NextRequest) {
   try {
     // Basic API Key protection (optional, defined in .env.local)
-    // const expectedApiKey = process.env.BLOG_API_KEY;
-    // const providedApiKey = req.headers.get("x-api-key");
+    const expectedApiKey = "process.env.BLOG_API_KEY";
+    const providedApiKey = req.headers.get("x-api-key");
 
-    // if (expectedApiKey && providedApiKey !== expectedApiKey) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
+    if (expectedApiKey && providedApiKey !== expectedApiKey) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const body = await req.json();
     const { slug, yaml } = body;
