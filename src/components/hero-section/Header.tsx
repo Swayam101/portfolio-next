@@ -5,8 +5,8 @@ import WaveTextHover from './WaveTextHover'
 const NAV_ITEMS = [
   { label: "Home", targetId: "" },
   { label: "About", targetId: "about" },
-  { label: "Contact", targetId: "contact" },
   { label: "Crafts", targetId: "projects" },
+  { label: "Contact", targetId: "contact" },
 ]
 
 const Header: React.FC = () => {
@@ -22,7 +22,7 @@ const Header: React.FC = () => {
       </div>
       <div style={{ fontWeight: 300 }} className="hidden sm:block sn-pro text-xl text-right text-[var(--fresh-sky)]">
         <nav>
-          <ul className="flex gap-8 text-right">
+          <ul className="flex gap-8 text-right items-center">
             {NAV_ITEMS.map(({ label, targetId }) => (
               <li key={label}>
                 <a
@@ -34,6 +34,14 @@ const Header: React.FC = () => {
                 </a>
               </li>
             ))}
+            <li>
+              <a
+                href="/blog"
+                className="header-nav-link no-underline font-medium"
+              >
+                Writing
+              </a>
+            </li>
           </ul>
         </nav>
       </div>

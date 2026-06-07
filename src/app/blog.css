@@ -1,0 +1,24 @@
+/*
+ * blog.css
+ * ─────────────────────────────────────────────
+ * Import this ONCE in your _app.tsx / layout.tsx:
+ *   import "@/styles/blog.css";
+ *
+ * Required for the drop-cap effect since Tailwind
+ * cannot target ::first-letter via utility classes.
+ *
+ * Also imports the three fonts used by the blog template.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Drop cap — applied to the very first paragraph of the first section */
+.drop-cap::first-letter {
+  font-family: 'Playfair Display', serif;
+  font-size: 78px;
+  font-weight: 900;
+  float: left;
+  line-height: 0.75;
+  margin: 6px 10px -4px 0;
+  color: #5bbfbf; /* --teal-dark */
+}

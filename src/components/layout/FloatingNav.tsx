@@ -215,6 +215,24 @@ export default function FloatingNav() {
                   </a>
                 </li>
               ))}
+              {/* Writing — real page link */}
+              <li>
+                <a
+                  href="/blog"
+                  className="sidebar-nav-link flex items-baseline gap-4 no-underline group"
+                  onClick={() => setOpen(false)}
+                >
+                  <span
+                    className="font-['Bebas_Neue'] text-5xl text-[var(--pacific-blue)] opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ lineHeight: 0.9 }}
+                  >
+                    {String(NAV_LINKS.length + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-2xl font-light text-[var(--yale-blue)] group-hover:text-[var(--pacific-blue)] transition-colors duration-300">
+                    Writing
+                  </span>
+                </a>
+              </li>
             </ul>
           </nav>
 
