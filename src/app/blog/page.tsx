@@ -13,7 +13,7 @@ export const revalidate = 300;
 export default async function BlogIndexPage() {
   const posts = await getAllPosts();
 
-  console.log("All Posts Log : ", posts);
+  console.log("All Posts Log : ", posts[0].SECTIONS[0]);
 
 
   return (

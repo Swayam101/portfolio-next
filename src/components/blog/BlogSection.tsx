@@ -17,7 +17,6 @@ interface Props {
 export function BlogSection({ section, sectionIndex }: Props) {
   const s = section.SECTION;
   const paragraphs = s.CONTENT.split(/\n\n+/).filter(Boolean);
-  let imageCount = 0;
 
   const afterIntro = s.COMPONENTS.filter(
     (c) => c.type === "IMAGE" && (c as { PLACEMENT: string }).PLACEMENT === "after_intro"
@@ -32,11 +31,25 @@ export function BlogSection({ section, sectionIndex }: Props) {
         (c as { PLACEMENT: string }).PLACEMENT !== "after_first_para")
   );
 
+  // Assign figure numbers once, in document order, before rendering
+  const figureNumbers = new Map<BlogComponent, number>();
+  let n = 0;
+  [...afterIntro, ...afterFirst, ...rest]
+    .filter((c) => c.type === "IMAGE")
+    .forEach((c) => figureNumbers.set(c, ++n));
+
   const renderComponent = (comp: BlogComponent, key: number | string) => {
+    console.log("comp type. : ", comp);
+
     switch (comp.type) {
       case "IMAGE":
-        imageCount++;
-        return <ImageBlock key={key} component={comp} figNum={imageCount} />;
+        return (
+          <ImageBlock
+            key={key}
+            component={comp}
+            figNum={figureNumbers.get(comp) ?? 0}
+          />
+        );
       case "STAT_STRIP":
         return <StatStripResponsive key={key} component={comp} />;
       case "GRID":
@@ -57,9 +70,8 @@ export function BlogSection({ section, sectionIndex }: Props) {
     <section id={sectionId} className={isFirst ? "" : "mt-10 sm:mt-14"}>
       {/* Section heading */}
       <div
-        className={`mb-4 sm:mb-5 ${
-          isFirst ? "" : "pt-8 sm:pt-10 border-t border-[#b8dede]"
-        }`}
+        className={`mb-4 sm:mb-5 ${isFirst ? "" : "pt-8 sm:pt-10 border-t border-[#b8dede]"
+          }`}
       >
         <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-[#5bbfbf] block mb-[7px]">
           § {s.NUM}
@@ -79,9 +91,8 @@ export function BlogSection({ section, sectionIndex }: Props) {
       {paragraphs.map((para, i) => (
         <React.Fragment key={i}>
           <p
-            className={`mb-[1.4em] text-[#2e4a5a] leading-[1.8] ${
-              s.DROP_CAP && i === 0 ? "drop-cap" : ""
-            }`}
+            className={`mb-[1.4em] text-[#2e4a5a] leading-[1.8] ${s.DROP_CAP && i === 0 ? "drop-cap" : ""
+              }`}
             style={{ fontSize: "clamp(16px, 2.2vw, 18px)" }}
           >
             {para}

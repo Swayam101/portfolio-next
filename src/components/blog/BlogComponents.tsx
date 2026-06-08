@@ -12,23 +12,19 @@ import type {
 } from "@/types/blog";
 
 // ── IMAGE ──────────────────────────────────────────────────
-export function ImageBlock({
-  component,
-  figNum,
-}: {
-  component: ImageComponent;
-  figNum: number;
-}) {
+export function ImageBlock({ component, figNum }: { component: ImageComponent; figNum: number }) {
   const aspectClass =
     component.ASPECT === "hero"
       ? "aspect-video"
       : component.ASPECT === "square"
-      ? "aspect-square"
-      : "aspect-[3/2]";
+        ? "aspect-square"
+        : "aspect-[3/2]";
+
+  const hasSrc = typeof component.SRC === "string" && component.SRC.trim() !== "";
 
   return (
     <div className="my-8 sm:my-10">
-      {component.SRC ? (
+      {hasSrc ? (
         <img
           src={component.SRC}
           alt={component.TITLE}
@@ -39,12 +35,12 @@ export function ImageBlock({
           className={`w-full ${aspectClass} bg-[#d4f0f0] border border-[#b8dede] flex items-center justify-center`}
         >
           <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-[#6a8a9a] text-center px-4">
-            {component.DESCRIPTION}
+            {component.DESCRIPTION ?? component.TITLE}
           </span>
         </div>
       )}
       <p className="font-mono text-[10px] sm:text-[11px] text-[#6a8a9a] tracking-[0.07em] pt-[9px] border-t border-[#b8dede] mt-[6px]">
-        Fig. {figNum} — {component.TITLE}
+        {figNum > 0 ? `Fig. ${figNum} — ` : ""}{component.TITLE}
       </p>
     </div>
   );
