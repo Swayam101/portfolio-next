@@ -16,7 +16,7 @@ export async function getPostSlugs(): Promise<string[]> {
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
-    await dbConnect();
+    // await dbConnect();
     const realSlug = slug.replace(/\.yaml$/, "");
     const doc = await YamlBlogPostModel.findOne({ slug: realSlug }).lean();
     if (!doc) return null;
@@ -27,6 +27,8 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
     return null;
   }
 }
+
+export const dynamic = 'force-dynamic';
 
 export async function getAllPosts(): Promise<(BlogPost & { slug: string })[]> {
   try {
