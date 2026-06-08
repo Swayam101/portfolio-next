@@ -20,7 +20,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
     const realSlug = slug.replace(/\.yaml$/, "");
     const doc = await YamlBlogPostModel.findOne({ slug: realSlug }).lean();
     if (!doc) return null;
-    
+
     return parseBlogYaml((doc as any).yaml);
   } catch (error) {
     console.error(`Failed to fetch post for slug ${slug}:`, error);
@@ -32,12 +32,17 @@ export async function getAllPosts(): Promise<(BlogPost & { slug: string })[]> {
   try {
     await dbConnect();
     const docs = await YamlBlogPostModel.find({}).sort({ createdAt: -1 }).lean();
-    
+
+    console.log("THE DOCS IN DAO : ", docs);
+
+
     const validPosts: (BlogPost & { slug: string })[] = [];
-    
+
     for (const doc of docs) {
       try {
         const post = parseBlogYaml((doc as any).yaml);
+        console.log("POST FROM PARSED YAML : ", post);
+
         validPosts.push({
           ...post,
           slug: (doc as any).slug
@@ -47,7 +52,7 @@ export async function getAllPosts(): Promise<(BlogPost & { slug: string })[]> {
         // Continue to the next post
       }
     }
-    
+
     return validPosts;
   } catch (error) {
     console.error("Failed to fetch all posts:", error);

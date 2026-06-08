@@ -13,6 +13,9 @@ export const revalidate = 300;
 export default async function BlogIndexPage() {
   const posts = await getAllPosts();
 
+  console.log("All Posts Log : ", posts);
+
+
   return (
     <div
       className="min-h-screen"
