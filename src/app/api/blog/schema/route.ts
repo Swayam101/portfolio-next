@@ -7,9 +7,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const blogContent: string = body?.content;
 
-    console.log("content is coming : ", blogContent);
-
-
     if (!blogContent || typeof blogContent !== "string" || !blogContent.trim()) {
       return NextResponse.json(
         { error: "Missing required field: content" },

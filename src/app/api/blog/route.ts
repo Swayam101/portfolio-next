@@ -9,13 +9,18 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    // Basic API Key protection (optional, defined in .env.local)
-    // const expectedApiKey = "process.env.BLOG_API_KEY";
-    // const providedApiKey = req.headers.get("x-api-key");
+    const expectedApiKey = process.env.BLOG_API_KEY;
+    if (!expectedApiKey) {
+      return NextResponse.json(
+        { error: "Blog API is not configured" },
+        { status: 503 }
+      );
+    }
 
-    // if (expectedApiKey && providedApiKey !== expectedApiKey) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
+    const providedApiKey = req.headers.get("x-api-key");
+    if (providedApiKey !== expectedApiKey) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const body = await req.json();
     const { slug, yaml } = body;
@@ -30,9 +35,10 @@ export async function POST(req: NextRequest) {
     // Validate the YAML against our schema
     try {
       parseBlogYaml(yaml);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown validation error";
       return NextResponse.json(
-        { error: "Invalid YAML format", details: err.message },
+        { error: "Invalid YAML format", details: message },
         { status: 400 }
       );
     }
@@ -42,7 +48,7 @@ export async function POST(req: NextRequest) {
     // Use findOneAndUpdate with upsert to insert or update the blog post
     const result = await YamlBlogPostModel.findOneAndUpdate(
       { slug },
-      { slug, yaml, updatedAt: new Date() },
+      { slug, yaml },
       { upsert: true, new: true }
     );
 

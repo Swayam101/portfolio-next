@@ -81,3 +81,14 @@ export interface BlogPost {
   SEO_DESCRIPTION?: string;
   OG_IMAGE?: string;
 }
+
+/** MongoDB document — slug + raw YAML string */
+export interface YamlBlogPost {
+  slug: string;
+  yaml: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/** Parsed blog post with URL slug */
+export type BlogPostWithSlug = BlogPost & { slug: string };

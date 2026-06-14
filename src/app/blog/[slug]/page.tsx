@@ -26,10 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return { title: "Post Not Found | Swayam" };
     }
     
-    // Support custom SEO fields if added, fallback to standard titles
-    const title = (post as any).SEO_TITLE || `${post.BLOG_TITLE} | Swayam`;
-    const description = (post as any).SEO_DESCRIPTION || post.SUBTITLE;
-    const ogImage = (post as any).OG_IMAGE || null;
+    const title = post.SEO_TITLE || `${post.BLOG_TITLE} | Swayam`;
+    const description = post.SEO_DESCRIPTION || post.SUBTITLE;
+    const ogImage = post.OG_IMAGE ?? null;
 
     return {
       title,

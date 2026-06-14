@@ -39,8 +39,6 @@ export function BlogSection({ section, sectionIndex }: Props) {
     .forEach((c) => figureNumbers.set(c, ++n));
 
   const renderComponent = (comp: BlogComponent, key: number | string) => {
-    console.log("comp type. : ", comp);
-
     switch (comp.type) {
       case "IMAGE":
         return (

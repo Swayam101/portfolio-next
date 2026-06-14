@@ -1,11 +1,14 @@
 import mongoose, { Schema } from "mongoose";
+import type { YamlBlogPost } from "@/types/blog";
 
-const YamlBlogPostSchema = new Schema({
-  slug: { type: String, required: true, unique: true, index: true },
-  yaml: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+const YamlBlogPostSchema = new Schema<YamlBlogPost>(
+  {
+    slug: { type: String, required: true, unique: true, index: true },
+    yaml: { type: String, required: true },
+  },
+  { timestamps: true }
+);
 
-export const YamlBlogPostModel = 
-  mongoose.models.YamlBlogPost || mongoose.model("YamlBlogPost", YamlBlogPostSchema);
+export const YamlBlogPostModel =
+  mongoose.models.YamlBlogPost ||
+  mongoose.model<YamlBlogPost>("YamlBlogPost", YamlBlogPostSchema);
