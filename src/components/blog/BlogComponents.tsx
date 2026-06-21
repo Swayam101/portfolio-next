@@ -47,38 +47,6 @@ export function ImageBlock({ component, figNum }: { component: ImageComponent; f
 }
 
 // ── STAT STRIP ─────────────────────────────────────────────
-export function StatStrip({ component }: { component: StatStripComponent }) {
-  const count = component.STATS.length;
-
-  return (
-    <div
-      className="my-8 sm:my-10 grid gap-px border border-[#b8dede]"
-      style={{
-        // Responsive: 1 col on mobile, up to count cols on sm+
-        gridTemplateColumns: `repeat(${Math.min(count, 1)}, 1fr)`,
-        background: "#b8dede",
-      }}
-    >
-      {/* We override the inline gridTemplateColumns via a responsive wrapper approach */}
-      {component.STATS.map((stat, i) => (
-        <div
-          key={i}
-          className="bg-[#f2fafa] px-5 py-6 sm:py-5 text-center"
-        >
-          <span className="font-serif font-black text-[28px] sm:text-[34px] text-[#1a2e3b] block leading-none mb-[6px]">
-            {stat.NUM}
-          </span>
-          <span className="font-mono text-[10px] tracking-[0.13em] uppercase text-[#6a8a9a]">
-            {stat.LABEL}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ── STAT STRIP (responsive via CSS grid auto-fit) ──────────
-// Note: We override StatStrip to use CSS auto-fit properly
 export function StatStripResponsive({ component }: { component: StatStripComponent }) {
   return (
     <div

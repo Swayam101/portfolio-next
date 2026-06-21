@@ -1,18 +1,20 @@
 // components/blog/BlogPage.tsx
 import React from "react";
-import type { BlogPost } from "@/types/blog";
+import type { BlogPostWithSlug, BlogSeriesGroup } from "@/types/blog";
 import { BlogMasthead } from "./BlogMasthead";
 import { BlogHero } from "./BlogHero";
 import { BlogBylineBar } from "./BlogBylineBar";
+import { BlogSeriesNav } from "./BlogSeriesNav";
 import { BlogSection } from "./BlogSection";
 import { BlogSidebar } from "./BlogSidebar";
 import { BlogCloser, BlogFooter } from "./BlogCloser";
 
 interface Props {
-  post: BlogPost;
+  post: BlogPostWithSlug;
+  series?: BlogSeriesGroup | null;
 }
 
-export function BlogPage({ post }: Props) {
+export function BlogPage({ post, series }: Props) {
   return (
     <div
       className="min-h-screen"
@@ -25,24 +27,22 @@ export function BlogPage({ post }: Props) {
         WebkitFontSmoothing: "antialiased",
       }}
     >
-      {/* ── MASTHEAD ── */}
       <BlogMasthead tags={post.TAGS} />
 
-      {/* ── HERO ── */}
       <BlogHero
         kicker={post.KICKER}
         title={post.BLOG_TITLE}
         subtitle={post.SUBTITLE}
       />
 
-      {/* ── BYLINE BAR ── */}
       <BlogBylineBar
         readTime={post.READ_TIME}
         tags={post.TAGS}
         date={post.DATE}
       />
 
-      {/* ── MOBILE/TABLET TOC — rendered ABOVE article body, part of BlogSidebar ── */}
+      {series && <BlogSeriesNav currentSlug={post.slug} series={series} />}
+
       <BlogSidebar toc={post.SIDEBAR_TOC} mobileOnly />
 
       {/* ── ARTICLE BODY ── */}

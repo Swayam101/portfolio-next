@@ -82,13 +82,33 @@ export interface BlogPost {
   OG_IMAGE?: string;
 }
 
-/** MongoDB document — slug + raw YAML string */
+/** MongoDB document — slug + raw YAML string + optional series metadata */
 export interface YamlBlogPost {
   slug: string;
   yaml: string;
+  seriesSlug?: string;
+  seriesDescription?: string;
+  active: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-/** Parsed blog post with URL slug */
-export type BlogPostWithSlug = BlogPost & { slug: string };
+/** Parsed blog post with URL slug and optional series metadata */
+export type BlogPostWithSlug = BlogPost & {
+  slug: string;
+  seriesSlug?: string;
+  seriesDescription?: string;
+};
+
+/** A group of posts belonging to the same series */
+export interface BlogSeriesGroup {
+  seriesSlug: string;
+  seriesDescription: string;
+  posts: BlogPostWithSlug[];
+}
+
+/** Structured blog index — series groups + standalone posts */
+export interface BlogCatalog {
+  series: BlogSeriesGroup[];
+  standalone: BlogPostWithSlug[];
+}

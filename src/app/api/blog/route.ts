@@ -3,73 +3,229 @@ import dbConnect from "@/lib/dbConnect";
 import { YamlBlogPostModel } from "@/models/YamlBlogPost";
 import { parseBlogYaml } from "@/lib/parseBlogYaml";
 import { revalidatePath } from "next/cache";
+import { checkApiKey } from "@/lib/adminAuth";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
+export async function GET(req: NextRequest) {
+  const authError = checkApiKey(req);
+  if (authError) return authError;
 
-export async function POST(req: NextRequest) {
   try {
-    console.log("[API /api/blog] Received POST request to create/update a blog post.");
-    const expectedApiKey = process.env.BLOG_API_KEY;
-    if (!expectedApiKey) {
-      console.error("[API /api/blog] Error: BLOG_API_KEY is not configured in environment variables.");
-      return NextResponse.json(
-        { error: "Blog API is not configured" },
-        { status: 503 }
+    await dbConnect();
+
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search")?.trim();
+    const seriesFilter = searchParams.get("series")?.trim();
+    const showAll = searchParams.get("all") === "true";
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.min(
+      50,
+      Math.max(1, parseInt(searchParams.get("limit") || "20", 10))
+    );
+
+    const query: Record<string, unknown> = {};
+    if (!showAll) {
+      query.active = true;
+    }
+    if (seriesFilter) {
+      query.seriesSlug = seriesFilter;
+    }
+
+    const allDocs = await YamlBlogPostModel.find(query)
+      .sort({ createdAt: -1 })
+      .select("slug yaml seriesSlug seriesDescription active createdAt")
+      .lean();
+
+    interface ParsedEntry {
+      slug: string;
+      BLOG_TITLE: string;
+      TAGS: string;
+      SUBTITLE: string;
+      seriesSlug?: string;
+      seriesDescription?: string;
+      active: boolean;
+      createdAt: Date;
+      [key: string]: unknown;
+    }
+
+    // Parse each doc once, attach parsed data, then filter
+    const parsedDocs: ParsedEntry[] = [];
+    for (const doc of allDocs) {
+      try {
+        const post = parseBlogYaml(doc.yaml);
+        parsedDocs.push({
+          ...post,
+          slug: doc.slug,
+          seriesSlug: doc.seriesSlug || undefined,
+          seriesDescription: doc.seriesDescription || undefined,
+          active: doc.active,
+          createdAt: doc.createdAt,
+        });
+      } catch {
+        // skip unparseable posts
+      }
+    }
+
+    // Search filter on already-parsed data (no double parse)
+    let filtered = parsedDocs;
+    if (search) {
+      const lower = search.toLowerCase();
+      filtered = parsedDocs.filter(
+        (p) =>
+          p.BLOG_TITLE.toLowerCase().includes(lower) ||
+          p.TAGS.toLowerCase().includes(lower) ||
+          p.SUBTITLE.toLowerCase().includes(lower)
       );
     }
 
-    const providedApiKey = req.headers.get("x-api-key");
-    if (providedApiKey !== expectedApiKey) {
-      console.warn("[API /api/blog] Warning: Unauthorized request (invalid API key).");
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const total = filtered.length;
+    const start = (page - 1) * limit;
+    const paginatedDocs = filtered.slice(start, start + limit);
+
+    const seriesMap = new Map<
+      string,
+      {
+        seriesSlug: string;
+        seriesDescription: string;
+        posts: ParsedEntry[];
+      }
+    >();
+    const standalone: ParsedEntry[] = [];
+
+    for (const doc of paginatedDocs) {
+      const sSlug = doc.seriesSlug?.trim();
+      if (sSlug) {
+        const existing = seriesMap.get(sSlug);
+        if (existing) {
+          existing.posts.push(doc);
+          if (!existing.seriesDescription && doc.seriesDescription) {
+            existing.seriesDescription = doc.seriesDescription;
+          }
+        } else {
+          seriesMap.set(sSlug, {
+            seriesSlug: sSlug,
+            seriesDescription: doc.seriesDescription ?? "",
+            posts: [doc],
+          });
+        }
+      } else {
+        standalone.push(doc);
+      }
     }
 
+    const series = Array.from(seriesMap.values()).map((group) => ({
+      ...group,
+      posts: [...group.posts].sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      ),
+    }));
+
+    return NextResponse.json({ total, page, limit, series, standalone });
+  } catch (error) {
+    console.error("[API /api/blog] Error listing posts:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const authError = checkApiKey(req);
+    if (authError) return authError;
+
     const body = await req.json();
-    const { slug, yaml } = body;
+    const { slug, yaml, seriesSlug, seriesDescription } = body;
 
-    console.log(`[API /api/blog] Processing payload for slug: "${slug}"`);
-
-    if (!slug || !yaml) {
-      console.warn("[API /api/blog] Warning: Missing required fields ('slug' or 'yaml').");
+    if (!slug || typeof slug !== "string") {
       return NextResponse.json(
-        { error: "Missing required fields: 'slug' and 'yaml'" },
+        { error: "Missing or invalid 'slug' field" },
+        { status: 400 }
+      );
+    }
+
+    if (!yaml || typeof yaml !== "string") {
+      return NextResponse.json(
+        { error: "Missing or invalid 'yaml' field" },
+        { status: 400 }
+      );
+    }
+
+    // Validate slug format: lowercase alphanumeric + hyphens only
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid slug format. Use lowercase letters, numbers, and hyphens only (e.g. 'my-new-post')",
+        },
         { status: 400 }
       );
     }
 
     // Validate the YAML against our schema
     try {
-      console.log(`[API /api/blog] Validating YAML for slug: "${slug}"...`);
       parseBlogYaml(yaml);
-      console.log(`[API /api/blog] YAML validation successful for slug: "${slug}".`);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown validation error";
-      console.error(`[API /api/blog] YAML validation failed for slug "${slug}":`, message);
+      const message =
+        err instanceof Error ? err.message : "Unknown validation error";
       return NextResponse.json(
         { error: "Invalid YAML format", details: message },
         { status: 400 }
       );
     }
 
-    console.log("[API /api/blog] Connecting to database...");
     await dbConnect();
-    console.log("[API /api/blog] Database connected. Upserting document...");
 
-    // Use findOneAndUpdate with upsert to insert or update the blog post
+    // Check if an existing post with this slug exists (for series cleanup)
+    const existing = await YamlBlogPostModel.findOne({ slug })
+      .select("seriesSlug")
+      .lean();
+
+    const update: Record<string, string> = { slug, yaml };
+    if (typeof seriesSlug === "string" && seriesSlug.trim()) {
+      update.seriesSlug = seriesSlug.trim();
+    }
+    if (typeof seriesDescription === "string" && seriesDescription.trim()) {
+      update.seriesDescription = seriesDescription.trim();
+    }
+
+    // Upsert the post — new posts default to active: true
     const result = await YamlBlogPostModel.findOneAndUpdate(
       { slug },
-      { slug, yaml },
+      { $set: update, $setOnInsert: { active: true } },
       { upsert: true, new: true }
     );
 
-    console.log(`[API /api/blog] Successfully saved post with slug: "${result.slug}". Revalidating cache...`);
+    // If the post changed series or left a series, clean up the old series
+    if (existing?.seriesSlug) {
+      const oldSeriesSlug = existing.seriesSlug;
+      const newSeriesSlug =
+        typeof seriesSlug === "string" && seriesSlug.trim()
+          ? seriesSlug.trim()
+          : undefined;
 
-    // Revalidate Next.js cache so the new post appears immediately
+      if (oldSeriesSlug !== newSeriesSlug) {
+        // Check if any other posts still reference the old series
+        const remaining = await YamlBlogPostModel.countDocuments({
+          seriesSlug: oldSeriesSlug,
+          slug: { $ne: slug },
+        });
+
+        if (remaining === 0) {
+          await YamlBlogPostModel.updateMany(
+            { seriesSlug: oldSeriesSlug, slug: { $ne: slug } },
+            { $unset: { seriesSlug: "", seriesDescription: "" } }
+          );
+        }
+      }
+    }
+
     revalidatePath("/blog");
     revalidatePath(`/blog/${slug}`);
 
-    console.log(`[API /api/blog] Cache revalidated. Returning success response.`);
     return NextResponse.json(
       { message: "Blog post saved successfully", slug: result.slug },
       { status: 200 }

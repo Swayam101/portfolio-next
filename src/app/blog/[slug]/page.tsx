@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPostBySlug, getPostSlugs } from "@/lib/blogApi";
+import { getPostBySlug, getPostSlugs, getPostsBySeriesSlug } from "@/lib/blogApi";
 import { BlogPage } from "@/components/blog/BlogPage";
 import type { Metadata } from "next";
 
@@ -61,9 +61,13 @@ export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
   
   let post;
+  let series = null;
   try {
     post = await getPostBySlug(slug);
     if (!post) notFound();
+    if (post.seriesSlug) {
+      series = await getPostsBySeriesSlug(post.seriesSlug);
+    }
   } catch {
     notFound();
   }
@@ -95,7 +99,7 @@ export default async function BlogPostPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
-      <BlogPage post={post} />
+      <BlogPage post={post} series={series} />
     </>
   );
 }
