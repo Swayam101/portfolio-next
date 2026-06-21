@@ -32,7 +32,7 @@ interface RawPost {
   updatedAt: string;
 }
 
-type View = "dashboard" | "editor" | "series";
+type View = "dashboard" | "editor" | "series" | "generate";
 
 const EMPTY_YAML = `BLOG_TITLE: ""
 KICKER: ""
@@ -53,6 +53,53 @@ SECTIONS:
         Write your first paragraph here.
       COMPONENTS: []
 `;
+
+const SCHEMA_PROMPT = `You are a blog post YAML generator. Given raw blog content (text, outline, or notes), convert it into the exact YAML schema below. Output ONLY the YAML string — no markdown fences, no explanation.
+
+## YAML Schema
+
+BLOG_TITLE: "The main visible headline"
+KICKER: "Category · Tag (e.g. Deep Dive · Engineering)"
+SUBTITLE: "A hook or subtitle beneath the title"
+READ_TIME: "X min read"
+TAGS: "Tag1 · Tag2 · Tag3"
+DATE: "Month Year (e.g. June 2025)"
+CLOSING_QUOTE: "A powerful quote to end the post"
+SEO_TITLE: "Optional: < 60 chars for search engines"
+SEO_DESCRIPTION: "Optional: < 160 chars for search snippets"
+OG_IMAGE: ""
+SIDEBAR_TOC:
+  - NUM: "I"
+    TITLE: "Section Name"
+SECTIONS:
+  - SECTION:
+      NUM: "I"
+      TITLE: "Section Name"
+      DROP_CAP: true
+      CONTENT: |
+        Paragraph one.
+
+        Paragraph two (blank line between paragraphs).
+      COMPONENTS: []
+
+## Rules
+
+1. BLOG_TITLE, KICKER, SUBTITLE, READ_TIME, TAGS, CLOSING_QUOTE are REQUIRED.
+2. DATE defaults to current month/year if not provided.
+3. SECTIONS use Roman numerals (I, II, III, IV, V…).
+4. SIDEBAR_TOC must mirror section titles exactly.
+5. Only FIRST section has DROP_CAP: true.
+6. CONTENT uses YAML literal block (|). Separate paragraphs with blank lines.
+7. COMPONENTS are optional — use only when natural:
+   - STAT_STRIP: numerical data (2-4 stats)
+   - CALLOUT: key takeaways (gold or red)
+   - PULL_QUOTE: strong extracted quote
+   - GRID: compare 2-4 items (NUM, LABEL, TITLE, BODY)
+   - IMAGE: placeholder SRC "https://example.com/placeholder-image-[N].jpg"
+8. Generate 3-5 sections depending on content length.
+9. Read time: ~200 words per minute.
+10. Tags: 2-4 tags separated by " · ".
+11. KICKER format: "Category · Tag"`;
 
 export default function AdminPage() {
   const [apiKey, setApiKey] = useState("");
@@ -83,6 +130,9 @@ export default function AdminPage() {
     message: string;
     type: "success" | "error";
   } | null>(null);
+
+  // Generator state
+  const [genInput, setGenInput] = useState("");
 
   const showToast = useCallback(
     (message: string, type: "success" | "error") => {
@@ -280,6 +330,21 @@ export default function AdminPage() {
     }
   };
 
+  const handleGenerateCopy = () => {
+    const combined = `${SCHEMA_PROMPT}\n\n---\n\nBLOG CONTENT:\n\n${genInput}`;
+    navigator.clipboard.writeText(combined);
+    showToast("Prompt + content copied to clipboard", "success");
+  };
+
+  const handleUseInEditor = () => {
+    const combined = `${SCHEMA_PROMPT}\n\n---\n\nBLOG CONTENT:\n\n${genInput}`;
+    setYaml(combined);
+    setEditingSlug(null);
+    setNewSlug("");
+    setValidationResult(null);
+    setView("editor");
+  };
+
   if (!authenticated) {
     return (
       <div
@@ -462,6 +527,7 @@ export default function AdminPage() {
           {(
             [
               { id: "dashboard", label: "Posts", icon: "◻" },
+              { id: "generate", label: "Generate", icon: "⚡" },
               { id: "editor", label: "Editor", icon: "✎" },
               { id: "series", label: "Series", icon: "▤" },
             ] as const
@@ -585,6 +651,14 @@ export default function AdminPage() {
             series={series}
             onRefresh={fetchSeries}
             onEditPost={openEditor}
+          />
+        )}
+        {view === "generate" && (
+          <Generator
+            input={genInput}
+            onInputChange={setGenInput}
+            onCopy={handleGenerateCopy}
+            onUseInEditor={handleUseInEditor}
           />
         )}
       </main>
@@ -1464,6 +1538,196 @@ function SeriesManager({
           ))}
         </div>
       )}
+    </>
+  );
+}
+
+function Generator({
+  input,
+  onInputChange,
+  onCopy,
+  onUseInEditor,
+}: {
+  input: string;
+  onInputChange: (v: string) => void;
+  onCopy: () => void;
+  onUseInEditor: () => void;
+}) {
+  const combined = `${SCHEMA_PROMPT}\n\n---\n\nBLOG CONTENT:\n\n${input}`;
+
+  return (
+    <>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 24,
+        }}
+      >
+        <div>
+          <h1
+            style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: 28,
+              letterSpacing: "0.08em",
+              color: "#d4f0f0",
+              margin: 0,
+            }}
+          >
+            Generate Prompt
+          </h1>
+          <div
+            style={{
+              fontSize: 12,
+              fontFamily: "monospace",
+              color: "#4a6a7a",
+              marginTop: 4,
+            }}
+          >
+            Paste your content → combines with schema prompt → copy to use with any AI
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={onUseInEditor}
+            disabled={!input.trim()}
+            style={{
+              padding: "9px 18px",
+              background: "rgba(91,191,191,0.12)",
+              border: "1px solid rgba(91,191,191,0.3)",
+              borderRadius: 4,
+              color: "#5bbfbf",
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: 13,
+              letterSpacing: "0.1em",
+              cursor: input.trim() ? "pointer" : "default",
+              opacity: input.trim() ? 1 : 0.4,
+            }}
+          >
+            OPEN IN EDITOR
+          </button>
+          <button
+            onClick={onCopy}
+            disabled={!input.trim()}
+            style={{
+              padding: "9px 22px",
+              background: input.trim() ? "#5bbfbf" : "rgba(91,191,191,0.15)",
+              border: "none",
+              borderRadius: 4,
+              color: input.trim() ? "#0d1b24" : "#8aaab8",
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: 14,
+              letterSpacing: "0.12em",
+              cursor: input.trim() ? "pointer" : "default",
+            }}
+          >
+            COPY COMBINED
+          </button>
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 16,
+          height: "calc(100vh - 200px)",
+        }}
+      >
+        {/* Input */}
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              fontSize: 10,
+              fontFamily: "monospace",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "#8aaab8",
+              marginBottom: 8,
+            }}
+          >
+            Your Content
+          </div>
+          <textarea
+            value={input}
+            onChange={(e) => onInputChange(e.target.value)}
+            placeholder={`Paste your blog content here.\n\nThis can be:\n• A rough draft\n• Bullet-point outline\n• Stream-of-consciousness notes\n• A finished article\n\nIt will be combined with the YAML schema prompt on the right.`}
+            style={{
+              flex: 1,
+              padding: "16px 18px",
+              background: "#0a151d",
+              border: "1px solid rgba(91,191,191,0.12)",
+              borderRadius: 4,
+              color: "#d4f0f0",
+              fontSize: 14,
+              fontFamily: "'SN Pro', sans-serif",
+              lineHeight: 1.7,
+              resize: "none",
+              outline: "none",
+            }}
+          />
+          <div
+            style={{
+              fontSize: 10,
+              fontFamily: "monospace",
+              color: "#4a6a7a",
+              marginTop: 6,
+              textAlign: "right",
+            }}
+          >
+            {input.length} chars
+          </div>
+        </div>
+
+        {/* Combined output */}
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              fontSize: 10,
+              fontFamily: "monospace",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "#8aaab8",
+              marginBottom: 8,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <span>Combined Prompt + Content</span>
+            <span style={{ color: "#4a6a7a" }}>
+              {combined.length} chars
+            </span>
+          </div>
+          <textarea
+            value={combined}
+            readOnly
+            style={{
+              flex: 1,
+              padding: "16px 18px",
+              background: "#0a151d",
+              border: "1px solid rgba(91,191,191,0.12)",
+              borderRadius: 4,
+              color: "#d4f0f0",
+              fontSize: 13,
+              fontFamily: "'SF Mono', 'Fira Code', 'Cascadia Code', monospace",
+              lineHeight: 1.7,
+              resize: "none",
+              outline: "none",
+            }}
+          />
+          <div
+            style={{
+              fontSize: 10,
+              fontFamily: "monospace",
+              color: "#4a6a7a",
+              marginTop: 6,
+            }}
+          >
+            Copy this and paste into any AI (ChatGPT, Claude, etc.) to get structured YAML
+          </div>
+        </div>
+      </div>
     </>
   );
 }
