@@ -1,6 +1,6 @@
 // components/blog/BlogSection.tsx
 import React from "react";
-import type { BlogSection as BlogSectionType, BlogComponent } from "@/types/blog";
+import type { BlogSection as BlogSectionType, BlogComponent } from "@/features/blog/types";
 import {
   ImageBlock,
   StatStripResponsive,

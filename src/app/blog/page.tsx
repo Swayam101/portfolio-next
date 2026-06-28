@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { getPostsCatalog } from "@/lib/blogApi";
-import { BlogPostListItem } from "@/components/blog/BlogPostListItem";
-import { formatSeriesTitle } from "@/components/blog/BlogSeriesNav";
+import { getPostsCatalog } from "@/features/blog/db";
+import { BlogIndexContent } from "@/features/blog/components/BlogIndexContent";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,7 +15,8 @@ export default async function BlogIndexPage() {
   const catalog = await getPostsCatalog();
   const totalPosts =
     catalog.standalone.length +
-    catalog.series.reduce((count, group) => count + group.posts.length, 0);
+    catalog.series.reduce((count, group) => count + group.posts.length, 0) +
+    catalog.categories.reduce((count, group) => count + group.posts.length, 0);
   const isEmpty = totalPosts === 0;
 
   return (
@@ -101,73 +101,11 @@ export default async function BlogIndexPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-16 sm:space-y-20">
-            {catalog.series.map((group) => (
-              <section key={group.seriesSlug}>
-                <div className="mb-6 pb-5 border-b border-[#c8e8e8]">
-                  <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#5bbfbf] m-0 mb-2">
-                    Series · {group.posts.length} {group.posts.length === 1 ? "part" : "parts"}
-                  </p>
-                  <h2
-                    className="font-serif font-bold text-[#1a2e3b] m-0 mb-2 leading-[1.15]"
-                    style={{ fontSize: "clamp(22px, 3.5vw, 30px)" }}
-                  >
-                    {formatSeriesTitle(group.seriesSlug)}
-                  </h2>
-                  {group.seriesDescription && (
-                    <p
-                      className="font-serif font-light italic text-[#4a6a7a] m-0 leading-[1.7] max-w-[560px]"
-                      style={{ fontSize: "clamp(14px, 2vw, 16px)" }}
-                    >
-                      {group.seriesDescription}
-                    </p>
-                  )}
-                </div>
-
-                <div className="divide-y divide-[#c8e8e8] border-l-2 border-[#5bbfbf]/25 pl-4 sm:pl-5">
-                  {group.posts.map((post, index) => (
-                    <BlogPostListItem
-                      key={post.slug}
-                      post={post}
-                      partLabel={`Part ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))}
-
-            {catalog.standalone.length > 0 && (
-              <section>
-                {catalog.series.length > 0 && (
-                  <div className="mb-6 pb-5 border-b border-[#c8e8e8]">
-                    <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#5bbfbf] m-0 mb-2">
-                      Essays
-                    </p>
-                    <h2
-                      className="font-serif font-bold text-[#1a2e3b] m-0 leading-[1.15]"
-                      style={{ fontSize: "clamp(22px, 3.5vw, 30px)" }}
-                    >
-                      Standalone
-                    </h2>
-                  </div>
-                )}
-
-                <div className="divide-y divide-[#c8e8e8]">
-                  {catalog.standalone.map((post, index) => (
-                    <BlogPostListItem
-                      key={post.slug}
-                      post={post}
-                      indexWatermark={String(index + 1).padStart(2, "0")}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
+          <BlogIndexContent catalog={catalog} />
         )}
       </main>
 
-      <footer className="bg-[#d4f0f0] border-t border-[#b8dede] px-5 sm:px-8 py-4 font-mono text-[10px] tracking-[0.12em] uppercase text-[#6a8a9a]">
+      <footer className="bg-[#d4f0f0] border-t border-[#b8dede] px-5 sm:px-8 lg:px-[60px] py-4 font-mono text-[10px] tracking-[0.12em] uppercase text-[#6a8a9a]">
         <div className="max-w-[740px] mx-auto flex flex-col sm:flex-row sm:justify-between gap-1">
           <span>Swayam Prajapat &nbsp;·&nbsp; Writing on Tech</span>
           <Link

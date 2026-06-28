@@ -12,6 +12,7 @@ export function useHydrationSafeMediaQuery(query: { maxWidth?: number; minWidth?
   const matches = useMediaQuery(query);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

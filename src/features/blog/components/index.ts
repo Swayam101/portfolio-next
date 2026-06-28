@@ -19,8 +19,13 @@ export { ImageBlock, StatStripResponsive, GridBlock, Callout, PullQuote } from "
 export type {
   BlogPost,
   BlogPostWithSlug,
+  BlogMetadata,
+  BlogCategory,
   BlogSeriesGroup,
+  BlogCategoryGroup,
   BlogCatalog,
   BlogSection as BlogSectionType,
   BlogComponent,
-} from "@/types/blog";
+} from "@/features/blog/types";
+
+export { BLOG_CATEGORIES } from "@/features/blog/types";

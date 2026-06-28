@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";
-import { YamlBlogPostModel } from "@/models/YamlBlogPost";
-import { parseBlogYaml } from "@/lib/parseBlogYaml";
+import { parseBlogYaml } from "@/features/blog/parseYaml";
 import { revalidatePath } from "next/cache";
 import { checkApiKey } from "@/lib/adminAuth";
+import { getRawPost, togglePostActive } from "@/features/blog/db";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +15,7 @@ export async function GET(
   if (authError) return authError;
 
   try {
-    await dbConnect();
-    const doc = await YamlBlogPostModel.findOne({ slug }).lean();
+    const doc = await getRawPost(slug);
     if (!doc) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -30,6 +28,13 @@ export async function GET(
         seriesSlug: doc.seriesSlug || undefined,
         seriesDescription: doc.seriesDescription || undefined,
         active: doc.active,
+        tags: doc.tags,
+        readTime: doc.readTime,
+        date: doc.date,
+        category: doc.category,
+        seoTitle: doc.seoTitle,
+        seoDescription: doc.seoDescription,
+        ogImage: doc.ogImage,
       });
     } catch (err: unknown) {
       const message =
@@ -67,15 +72,8 @@ export async function PATCH(
       );
     }
 
-    await dbConnect();
-
-    const doc = await YamlBlogPostModel.findOneAndUpdate(
-      { slug },
-      { active },
-      { new: true }
-    );
-
-    if (!doc) {
+    const success = await togglePostActive(slug, active);
+    if (!success) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
@@ -84,8 +82,8 @@ export async function PATCH(
 
     return NextResponse.json({
       message: active ? "Post activated" : "Post deactivated",
-      slug: doc.slug,
-      active: doc.active,
+      slug,
+      active,
     });
   } catch (error) {
     console.error(`[API /api/blog/${slug}] PATCH error:`, error);

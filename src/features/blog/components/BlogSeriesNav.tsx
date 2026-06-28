@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { BlogPostWithSlug, BlogSeriesGroup } from "@/types/blog";
+import type { BlogPostWithSlug, BlogSeriesGroup } from "@/features/blog/types";
 
 function formatSeriesTitle(seriesSlug: string): string {
   return seriesSlug
@@ -77,7 +77,7 @@ export function BlogSeriesNav({ currentSlug, series }: Props) {
                     </span>
                     {!isCurrent && (
                       <span className="block font-mono text-[9px] tracking-[0.12em] uppercase text-[#8aaab8] mt-1">
-                        {post.READ_TIME}
+                        {post.readTime}
                       </span>
                     )}
                   </span>

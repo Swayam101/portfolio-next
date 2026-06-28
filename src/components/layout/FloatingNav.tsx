@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { useHydrationSafeMediaQuery } from "../../hooks/useHydrationSafeMediaQuery";
 import { gsap } from "gsap";
 import { scrollToSection } from "../../utils/scrollToSection";
@@ -217,7 +218,7 @@ export default function FloatingNav() {
               ))}
               {/* Writing — real page link */}
               <li>
-                <a
+                <Link
                   href="/blog"
                   className="sidebar-nav-link flex items-baseline gap-4 no-underline group"
                   onClick={() => setOpen(false)}
@@ -231,7 +232,7 @@ export default function FloatingNav() {
                   <span className="text-2xl font-light text-[var(--yale-blue)] group-hover:text-[var(--pacific-blue)] transition-colors duration-300">
                     Writing
                   </span>
-                </a>
+                </Link>
               </li>
             </ul>
           </nav>

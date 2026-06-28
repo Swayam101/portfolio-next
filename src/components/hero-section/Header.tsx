@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link'
 import { scrollToSection } from '../../utils/scrollToSection'
 import WaveTextHover from './WaveTextHover'
 
@@ -35,12 +36,12 @@ const Header: React.FC = () => {
               </li>
             ))}
             <li>
-              <a
+              <Link
                 href="/blog"
                 className="header-nav-link no-underline font-medium"
               >
                 Writing
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>

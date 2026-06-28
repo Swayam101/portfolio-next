@@ -6,7 +6,7 @@
 //    <BlogSidebar toc={…} desktopOnly />  → renders only the sticky desktop aside
 // ─────────────────────────────────────────────────────
 import React, { useState, useEffect } from "react";
-import type { SidebarTOCItem } from "@/types/blog";
+import type { SidebarTOCItem } from "@/features/blog/types";
 
 interface Props {
   toc: SidebarTOCItem[];

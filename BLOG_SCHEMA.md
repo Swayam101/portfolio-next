@@ -1,19 +1,16 @@
 # Blog Generation Schema & Rules
 
-This document outlines the strict YAML schema required for rendering blog posts dynamically. It must be strictly followed when generating new posts.
+This document outlines the YAML schema for blog post content and the separate metadata fields stored in MongoDB.
 
-## Core Metadata
+## YAML Content Schema
+
+The YAML string contains only the directly-rendered blog content. Metadata (tags, read time, date, SEO) is stored as separate MongoDB fields — see below.
+
 ```yaml
 BLOG_TITLE: "The main visible headline of the blog"
 KICKER: "Category · Tag (e.g. Deep Dive · Engineering)"
 SUBTITLE: "A hook or subtitle displayed beneath the title."
-READ_TIME: "X min read"
-TAGS: "Tag1 · Tag2 · Tag3"
-DATE: "Month Year (e.g. June 2025)"
 CLOSING_QUOTE: "A powerful quote to end the post"
-SEO_TITLE: "Optional: The title used for search engines (< 60 chars)"
-SEO_DESCRIPTION: "Optional: Search engine snippet (< 160 chars)"
-OG_IMAGE: "Optional: URL for social media preview card"
 ```
 
 ## Structure & Sidebars
@@ -88,3 +85,21 @@ You can insert these components inside the `COMPONENTS` array of any `SECTION`.
 - type: "PULL_QUOTE"
   TEXT: "A strong quote extracted from the text."
 ```
+
+---
+
+## Post Metadata (stored in MongoDB, not in YAML)
+
+These fields are stored as separate document fields alongside the YAML string:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `tags` | string | no | Tags separated by " · " (e.g. "Dev · Career · Architecture") |
+| `readTime` | string | no | Read time (e.g. "8 min read") |
+| `date` | string | no | Publication date (e.g. "June 2025") |
+| `category` | string | no | One of: `people`, `anatomy`, `footnotes`, `deep-currents` |
+| `seoTitle` | string | no | SEO title (< 60 chars) |
+| `seoDescription` | string | no | SEO description (< 160 chars) |
+| `ogImage` | string | no | URL for social media preview card |
+
+These are set via the admin panel's "Post Settings" tab or through the API.

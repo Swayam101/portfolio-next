@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";
-import { YamlBlogPostModel } from "@/models/YamlBlogPost";
-import { parseBlogYaml } from "@/lib/parseBlogYaml";
 import { checkApiKey } from "@/lib/adminAuth";
+import { getPostsBySeriesSlug } from "@/features/blog/db";
+import dbConnect from "@/lib/db/connect";
+import { YamlBlogPostModel } from "@/features/blog/models";
+import { parseBlogYaml } from "@/features/blog/parseYaml";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,31 @@ export async function GET(req: NextRequest) {
   if (authError) return authError;
 
   try {
+    const { searchParams } = new URL(req.url);
+    const seriesSlug = searchParams.get("series")?.trim();
+
+    if (seriesSlug) {
+      const group = await getPostsBySeriesSlug(seriesSlug);
+      if (!group) {
+        return NextResponse.json({ series: [] });
+      }
+      return NextResponse.json({
+        series: [
+          {
+            seriesSlug: group.seriesSlug,
+            seriesDescription: group.seriesDescription,
+            postCount: group.posts.length,
+            unparseableCount: 0,
+            posts: group.posts.map((p) => ({
+              slug: p.slug,
+              BLOG_TITLE: p.BLOG_TITLE,
+            })),
+          },
+        ],
+      });
+    }
+
+    // All series
     await dbConnect();
     const docs = await YamlBlogPostModel.find({ active: true })
       .sort({ createdAt: -1 })
@@ -22,43 +48,28 @@ export async function GET(req: NextRequest) {
       {
         seriesSlug: string;
         seriesDescription: string;
-        posts: {
-          slug: string;
-          BLOG_TITLE: string;
-          createdAt: Date;
-        }[];
+        posts: { slug: string; BLOG_TITLE: string; createdAt: Date }[];
         unparseable: number;
       }
     >();
 
     for (const doc of docs) {
       if (!doc.seriesSlug) continue;
-
       try {
         const post = parseBlogYaml(doc.yaml);
         const existing = seriesMap.get(doc.seriesSlug);
+        const entry = { slug: doc.slug, BLOG_TITLE: post.BLOG_TITLE, createdAt: doc.createdAt };
         if (existing) {
-          existing.posts.push({
-            slug: doc.slug,
-            BLOG_TITLE: post.BLOG_TITLE,
-            createdAt: doc.createdAt,
-          });
+          existing.posts.push(entry);
         } else {
           seriesMap.set(doc.seriesSlug, {
             seriesSlug: doc.seriesSlug,
             seriesDescription: doc.seriesDescription || "",
-            posts: [
-              {
-                slug: doc.slug,
-                BLOG_TITLE: post.BLOG_TITLE,
-                createdAt: doc.createdAt,
-              },
-            ],
+            posts: [entry],
             unparseable: 0,
           });
         }
       } catch {
-        // Track unparseable posts in the series
         const existing = seriesMap.get(doc.seriesSlug);
         if (existing) {
           existing.unparseable++;
@@ -73,18 +84,19 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const series = Array.from(seriesMap.values()).map((group) => ({
-      seriesSlug: group.seriesSlug,
-      seriesDescription: group.seriesDescription,
-      postCount: group.posts.length,
-      unparseableCount: group.unparseable,
-      posts: [...group.posts]
-        .sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        )
-        .map(({ slug, BLOG_TITLE }) => ({ slug, BLOG_TITLE })),
-    }));
+    const series = Array.from(seriesMap.values())
+      .sort((a, b) => {
+        const aDate = a.posts[0]?.createdAt ?? new Date(0);
+        const bDate = b.posts[0]?.createdAt ?? new Date(0);
+        return new Date(bDate).getTime() - new Date(aDate).getTime();
+      })
+      .map(({ posts, ...rest }) => ({
+        ...rest,
+        postCount: posts.length,
+        posts: posts
+          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+          .map(({ slug, BLOG_TITLE }) => ({ slug, BLOG_TITLE })),
+      }));
 
     return NextResponse.json({ series });
   } catch (error) {

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import MY_PROJECTS from "@/data/projects";
-import { getPostSlugs } from "@/lib/blogApi";
+import { getPostSlugs } from "@/features/blog/db";
 
 const BASE_URL = "https://www.swayam.space";
 

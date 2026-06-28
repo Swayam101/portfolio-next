@@ -3,7 +3,7 @@
  */
 
 import yaml from "js-yaml";
-import type { BlogPost, BlogComponent, BlogSection } from "@/types/blog";
+import type { BlogPost, BlogComponent, BlogSection } from "@/features/blog/types";
 
 function normaliseComponent(raw: Record<string, unknown>): BlogComponent | null {
   // ── Shape A: { type: "IMAGE", TITLE: ..., SRC: ... }  (flat)
@@ -23,7 +23,6 @@ function normaliseComponent(raw: Record<string, unknown>): BlogComponent | null 
       ["IMAGE", "STAT_STRIP", "GRID", "CALLOUT", "PULL_QUOTE"].includes(k.toUpperCase())
     );
     if (!key) {
-      console.warn("[parseBlogYaml] Unrecognised component shape:", raw);
       return null;
     }
     type = key.toUpperCase();
@@ -67,7 +66,6 @@ function normaliseComponent(raw: Record<string, unknown>): BlogComponent | null 
       };
 
     default:
-      console.warn("[parseBlogYaml] Unknown component type:", type);
       return null;
   }
 }
@@ -100,14 +98,8 @@ export function parseBlogYaml(raw: string): BlogPost {
     BLOG_TITLE: (doc.BLOG_TITLE as string) ?? "",
     KICKER: (doc.KICKER as string) ?? "",
     SUBTITLE: (doc.SUBTITLE as string) ?? "",
-    READ_TIME: (doc.READ_TIME as string) ?? "",
-    TAGS: (doc.TAGS as string) ?? "",
-    DATE: doc.DATE as string | undefined,
     CLOSING_QUOTE: (doc.CLOSING_QUOTE as string) ?? "",
     SECTIONS: sections,
     SIDEBAR_TOC: (doc.SIDEBAR_TOC ?? []) as { NUM: string; TITLE: string }[],
-    SEO_TITLE: doc.SEO_TITLE as string | undefined,
-    SEO_DESCRIPTION: doc.SEO_DESCRIPTION as string | undefined,
-    OG_IMAGE: doc.OG_IMAGE as string | undefined,
   };
 }

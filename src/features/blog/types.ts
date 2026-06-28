@@ -71,34 +71,56 @@ export interface BlogPost {
   BLOG_TITLE: string;
   KICKER: string;
   SUBTITLE: string;
-  READ_TIME: string;
-  TAGS: string;
   CLOSING_QUOTE: string;
-  DATE?: string;
   SECTIONS: BlogSection[];
   SIDEBAR_TOC: SidebarTOCItem[];
-  SEO_TITLE?: string;
-  SEO_DESCRIPTION?: string;
-  OG_IMAGE?: string;
 }
 
-/** MongoDB document — slug + raw YAML string + optional series metadata */
+export type BlogCategory = "people" | "anatomy" | "footnotes" | "deep-currents";
+
+export const BLOG_CATEGORIES: { slug: BlogCategory; label: string }[] = [
+  { slug: "people", label: "The People Behind" },
+  { slug: "anatomy", label: "Anatomy" },
+  { slug: "footnotes", label: "Footnotes" },
+  { slug: "deep-currents", label: "Deep Currents" },
+];
+
+/** Metadata fields stored as separate MongoDB fields (not in YAML) */
+export interface BlogMetadata {
+  tags?: string;
+  readTime?: string;
+  date?: string;
+  category?: BlogCategory;
+  seoTitle?: string;
+  seoDescription?: string;
+  ogImage?: string;
+}
+
+/** MongoDB document — slug + raw YAML string + metadata + series */
 export interface YamlBlogPost {
   slug: string;
   yaml: string;
   seriesSlug?: string;
   seriesDescription?: string;
   active: boolean;
+  tags?: string;
+  readTime?: string;
+  date?: string;
+  category?: BlogCategory;
+  seoTitle?: string;
+  seoDescription?: string;
+  ogImage?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-/** Parsed blog post with URL slug and optional series metadata */
-export type BlogPostWithSlug = BlogPost & {
-  slug: string;
-  seriesSlug?: string;
-  seriesDescription?: string;
-};
+/** Parsed blog post with URL slug, metadata, and series info */
+export type BlogPostWithSlug = BlogPost &
+  BlogMetadata & {
+    slug: string;
+    seriesSlug?: string;
+    seriesDescription?: string;
+  };
 
 /** A group of posts belonging to the same series */
 export interface BlogSeriesGroup {
@@ -107,8 +129,16 @@ export interface BlogSeriesGroup {
   posts: BlogPostWithSlug[];
 }
 
-/** Structured blog index — series groups + standalone posts */
+/** A group of posts belonging to the same category */
+export interface BlogCategoryGroup {
+  category: BlogCategory;
+  label: string;
+  posts: BlogPostWithSlug[];
+}
+
+/** Structured blog index — series + standalone + category groups */
 export interface BlogCatalog {
   series: BlogSeriesGroup[];
   standalone: BlogPostWithSlug[];
+  categories: BlogCategoryGroup[];
 }

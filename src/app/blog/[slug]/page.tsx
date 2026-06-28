@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { getPostBySlug, getPostSlugs, getPostsBySeriesSlug } from "@/lib/blogApi";
-import { BlogPage } from "@/components/blog/BlogPage";
+import { getPostBySlug, getPostSlugs, getPostsBySeriesSlug } from "@/features/blog/db";
+import { BlogPage } from "@/features/blog/components/BlogPage";
 import type { Metadata } from "next";
 
 import "../../blog.css";
@@ -26,9 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return { title: "Post Not Found | Swayam" };
     }
     
-    const title = post.SEO_TITLE || `${post.BLOG_TITLE} | Swayam`;
-    const description = post.SEO_DESCRIPTION || post.SUBTITLE;
-    const ogImage = post.OG_IMAGE ?? null;
+    const title = post.seoTitle || `${post.BLOG_TITLE} | Swayam`;
+    const description = post.seoDescription || post.SUBTITLE;
+    const ogImage = post.ogImage ?? null;
 
     return {
       title,
@@ -64,12 +64,12 @@ export default async function BlogPostPage({ params }: Props) {
   let series = null;
   try {
     post = await getPostBySlug(slug);
-    if (!post) notFound();
-    if (post.seriesSlug) {
-      series = await getPostsBySeriesSlug(post.seriesSlug);
-    }
   } catch {
     notFound();
+  }
+  if (!post) notFound();
+  if (post.seriesSlug) {
+    series = await getPostsBySeriesSlug(post.seriesSlug);
   }
 
   // JSON-LD for general-audience articles — Article type
@@ -88,7 +88,7 @@ export default async function BlogPostPage({ params }: Props) {
       name: "Swayam Prajapat",
       url: BASE_URL,
     },
-    datePublished: post.DATE,
+    datePublished: post.date,
     url: `${BASE_URL}/blog/${slug}`,
     mainEntityOfPage: `${BASE_URL}/blog/${slug}`,
   };

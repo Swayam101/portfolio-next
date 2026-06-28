@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";
-import { YamlBlogPostModel } from "@/models/YamlBlogPost";
 import { checkApiKey } from "@/lib/adminAuth";
+import { getRawPost } from "@/features/blog/db";
 
 export const dynamic = "force-dynamic";
 
@@ -14,10 +13,7 @@ export async function GET(
   if (authError) return authError;
 
   try {
-    await dbConnect();
-    const doc = await YamlBlogPostModel.findOne({ slug })
-      .select("slug yaml seriesSlug seriesDescription active createdAt updatedAt")
-      .lean();
+    const doc = await getRawPost(slug);
     if (!doc) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -28,6 +24,13 @@ export async function GET(
       seriesSlug: doc.seriesSlug || undefined,
       seriesDescription: doc.seriesDescription || undefined,
       active: doc.active,
+      tags: doc.tags,
+      readTime: doc.readTime,
+      date: doc.date,
+      category: doc.category,
+      seoTitle: doc.seoTitle,
+      seoDescription: doc.seoDescription,
+      ogImage: doc.ogImage,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });

@@ -3,13 +3,14 @@
 //  All schema component renderers — fully responsive.
 // ──────────────────────────────────────────────────────────
 import React from "react";
+import Image from "next/image";
 import type {
   ImageComponent,
   StatStripComponent,
   GridComponent,
   CalloutComponent,
   PullQuoteComponent,
-} from "@/types/blog";
+} from "@/features/blog/types";
 
 // ── IMAGE ──────────────────────────────────────────────────
 export function ImageBlock({ component, figNum }: { component: ImageComponent; figNum: number }) {
@@ -25,9 +26,12 @@ export function ImageBlock({ component, figNum }: { component: ImageComponent; f
   return (
     <div className="my-8 sm:my-10">
       {hasSrc ? (
-        <img
-          src={component.SRC}
+        <Image
+          src={component.SRC!}
           alt={component.TITLE}
+          width={1200}
+          height={800}
+          unoptimized
           className={`w-full block border border-[#b8dede] ${aspectClass} object-cover`}
         />
       ) : (

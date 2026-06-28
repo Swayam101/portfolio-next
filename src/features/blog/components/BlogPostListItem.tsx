@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { BlogPostWithSlug } from "@/types/blog";
+import type { BlogPostWithSlug } from "@/features/blog/types";
+import { BLOG_CATEGORIES } from "@/features/blog/types";
 
 interface Props {
   post: BlogPostWithSlug;
@@ -7,7 +8,14 @@ interface Props {
   indexWatermark?: string;
 }
 
+function getCategoryLabel(slug?: string): string | null {
+  if (!slug) return null;
+  return BLOG_CATEGORIES.find((c) => c.slug === slug)?.label ?? null;
+}
+
 export function BlogPostListItem({ post, partLabel, indexWatermark }: Props) {
+  const categoryLabel = getCategoryLabel(post.category);
+
   return (
     <article className="group py-9 sm:py-11 relative">
       {indexWatermark && (
@@ -30,9 +38,15 @@ export function BlogPostListItem({ post, partLabel, indexWatermark }: Props) {
             <span aria-hidden>·</span>
           </>
         )}
-        <span>{post.DATE ?? "Recent"}</span>
+        {categoryLabel && (
+          <>
+            <span className="text-[#5bbfbf]">{categoryLabel}</span>
+            <span aria-hidden>·</span>
+          </>
+        )}
+        <span>{post.date ?? "Recent"}</span>
         <span aria-hidden>·</span>
-        <span>{post.READ_TIME}</span>
+        <span>{post.readTime}</span>
       </div>
 
       <Link href={`/blog/${post.slug}`} className="block no-underline">
@@ -53,7 +67,7 @@ export function BlogPostListItem({ post, partLabel, indexWatermark }: Props) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
-          {(post.TAGS ?? "")
+          {(post.tags ?? "")
             .split("·")
             .map((t) => t.trim())
             .filter(Boolean)

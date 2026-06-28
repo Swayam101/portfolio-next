@@ -20,6 +20,7 @@ Returns blog posts as parsed JSON, grouped into series and standalone posts.
 |-------|------|---------|-------------|
 | `search` | string | — | Filter by title, tags, or subtitle (case-insensitive). Matched against already-parsed posts. |
 | `series` | string | — | Filter by series slug |
+| `category` | string | — | Filter by category slug (e.g. `people`, `anatomy`, `footnotes`, `deep-currents`) |
 | `all` | boolean | `false` | If `true`, returns both active and inactive posts (for admin panel). Default only returns active posts. |
 | `page` | number | `1` | Page number (min 1) |
 | `limit` | number | `20` | Posts per page (1–50) |
@@ -40,19 +41,20 @@ Returns blog posts as parsed JSON, grouped into series and standalone posts.
           "BLOG_TITLE": "Why Most Developers Never Get Good at System Design",
           "KICKER": "Deep Dive · Engineering",
           "SUBTITLE": "Everyone learns algorithms...",
-          "READ_TIME": "8 min read",
-          "TAGS": "Dev · Career · Architecture",
-          "DATE": "June 2025",
           "CLOSING_QUOTE": "...",
-          "SEO_TITLE": "System Design for Developers",
-          "SEO_DESCRIPTION": "Why most developers struggle...",
-          "OG_IMAGE": "https://...",
           "SECTIONS": [],
           "SIDEBAR_TOC": [],
           "active": true,
           "slug": "system-design",
           "seriesSlug": "distributed-systems",
-          "seriesDescription": "A deep dive into distributed systems"
+          "seriesDescription": "A deep dive into distributed systems",
+  "tags": "Dev · Career · Architecture",
+  "readTime": "8 min read",
+  "date": "June 2025",
+  "category": "anatomy",
+  "seoTitle": "System Design for Developers",
+          "seoDescription": "Why most developers struggle...",
+          "ogImage": "https://..."
         }
       ]
     }
@@ -62,7 +64,10 @@ Returns blog posts as parsed JSON, grouped into series and standalone posts.
       "BLOG_TITLE": "...",
       "slug": "...",
       "SECTIONS": [],
-      "SIDEBAR_TOC": []
+      "SIDEBAR_TOC": [],
+      "tags": "...",
+      "readTime": "...",
+      "date": "..."
     }
   ]
 }
@@ -96,13 +101,7 @@ Returns the full parsed blog post with all sections and components.
   "BLOG_TITLE": "Why Most Developers Never Get Good at System Design",
   "KICKER": "Deep Dive · Engineering",
   "SUBTITLE": "Everyone learns algorithms...",
-  "READ_TIME": "8 min read",
-  "TAGS": "Dev · Career · Architecture",
-  "DATE": "June 2025",
   "CLOSING_QUOTE": "The gap between...",
-  "SEO_TITLE": "System Design for Developers",
-  "SEO_DESCRIPTION": "Why most developers struggle with system design...",
-  "OG_IMAGE": "https://...",
   "SIDEBAR_TOC": [
     { "NUM": "I", "TITLE": "The Hidden Curriculum" },
     { "NUM": "II", "TITLE": "What Scale Actually Means" }
@@ -123,7 +122,14 @@ Returns the full parsed blog post with all sections and components.
         ]
       }
     }
-  ]
+  ],
+  "active": true,
+  "tags": "Dev · Career · Architecture",
+  "readTime": "8 min read",
+  "date": "June 2025",
+  "seoTitle": "System Design for Developers",
+  "seoDescription": "Why most developers struggle with system design...",
+  "ogImage": "https://..."
 }
 ```
 
@@ -158,6 +164,12 @@ Returns the raw YAML string and metadata for editing in a YAML editor.
   "seriesSlug": "distributed-systems",
   "seriesDescription": "A deep dive into distributed systems",
   "active": true,
+  "tags": "Dev · Career · Architecture",
+  "readTime": "8 min read",
+  "date": "June 2025",
+  "seoTitle": "System Design for Developers",
+  "seoDescription": "Why most developers struggle...",
+  "ogImage": "https://...",
   "createdAt": "2025-06-01T12:00:00.000Z",
   "updatedAt": "2025-06-15T08:30:00.000Z"
 }
@@ -183,16 +195,29 @@ Upserts a blog post. The `slug` is the identity field — it cannot be changed a
   "slug": "system-design",
   "yaml": "BLOG_TITLE: \"Why Most...\"\nKICKER: \"Deep Dive · Engineering\"\n...",
   "seriesSlug": "distributed-systems",
-  "seriesDescription": "A deep dive into distributed systems"
+  "seriesDescription": "A deep dive into distributed systems",
+  "tags": "Dev · Career · Architecture",
+  "readTime": "8 min read",
+  "date": "June 2025",
+  "seoTitle": "System Design for Developers",
+  "seoDescription": "Why most developers struggle...",
+  "ogImage": "https://..."
 }
 ```
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `slug` | string | yes | URL-friendly identifier. **Must be lowercase alphanumeric + hyphens only** (e.g. `my-new-post`). Cannot be changed after creation. |
-| `yaml` | string | yes | Full blog post content in YAML format. Must pass schema validation. See `BLOG_SCHEMA.md` for the schema. Supports both flat and nested component formats. |
+| `yaml` | string | yes | Blog post content in YAML format. Must pass schema validation. See `BLOG_SCHEMA.md` for the content-only schema. |
 | `seriesSlug` | string | no | Groups this post into a series. All posts with the same `seriesSlug` appear together on the blog index. |
 | `seriesDescription` | string | no | Description shown on the blog index for the series group. |
+| `tags` | string | no | Tags separated by " · " (e.g. "Dev · Career · Architecture") |
+| `readTime` | string | no | Read time (e.g. "8 min read") |
+| `date` | string | no | Publication date (e.g. "June 2025") |
+| `category` | string | no | One of: `people`, `anatomy`, `footnotes`, `deep-currents` |
+| `seoTitle` | string | no | SEO title (< 60 chars) |
+| `seoDescription` | string | no | SEO description (< 160 chars) |
+| `ogImage` | string | no | URL for social media preview card |
 
 **Slug validation rules:**
 - Lowercase letters, numbers, and hyphens only
@@ -408,7 +433,9 @@ The API key is set via the `BLOG_API_KEY` environment variable. Requests without
 
 ---
 
-## YAML Post Schema
+## YAML Content Schema
+
+The YAML string contains only directly-rendered blog content. Metadata is stored as separate MongoDB fields.
 
 Full schema is defined in `BLOG_SCHEMA.md`. Required fields:
 
@@ -416,13 +443,7 @@ Full schema is defined in `BLOG_SCHEMA.md`. Required fields:
 BLOG_TITLE: "string — required"
 KICKER: "string — required"
 SUBTITLE: "string — required"
-READ_TIME: "string — required, e.g. '8 min read'"
-TAGS: "string — required, e.g. 'Dev · Career · Architecture'"
 CLOSING_QUOTE: "string — required"
-DATE: "string — optional, e.g. 'June 2025'"
-SEO_TITLE: "string — optional, < 60 chars"
-SEO_DESCRIPTION: "string — optional, < 160 chars"
-OG_IMAGE: "string — optional, URL"
 SIDEBAR_TOC:
   - NUM: "Roman numeral — required"
     TITLE: "string — required"
@@ -434,6 +455,18 @@ SECTIONS:
       CONTENT: "string — multi-paragraph, blank-line separated"
       COMPONENTS: "array — optional, see component types below"
 ```
+
+### Post Metadata (stored in MongoDB)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tags` | string | Tags separated by " · " (e.g. "Dev · Career · Architecture") |
+| `readTime` | string | Read time (e.g. "8 min read") |
+| `date` | string | Publication date (e.g. "June 2025") |
+| `category` | string | One of: `people`, `anatomy`, `footnotes`, `deep-currents` |
+| `seoTitle` | string | SEO title (< 60 chars) |
+| `seoDescription` | string | SEO description (< 160 chars) |
+| `ogImage` | string | URL for social media preview card |
 
 ### Component Types
 
@@ -492,7 +525,10 @@ curl -X POST https://www.swayam.space/api/blog \
   -H "x-api-key: your_api_key" \
   -d '{
     "slug": "my-new-post",
-    "yaml": "BLOG_TITLE: \"My New Post\"\nKICKER: \"Tech · Writing\"\nSUBTITLE: \"A short subtitle.\"\nREAD_TIME: \"5 min read\"\nTAGS: \"Tech · Writing\"\nDATE: \"June 2025\"\nCLOSING_QUOTE: \"The end.\"\nSIDEBAR_TOC:\n  - NUM: \"I\"\n    TITLE: \"Introduction\"\nSECTIONS:\n  - SECTION:\n      NUM: \"I\"\n      TITLE: \"Introduction\"\n      DROP_CAP: true\n      CONTENT: |\n        First paragraph.\n\n        Second paragraph.\n      COMPONENTS: []"
+    "yaml": "BLOG_TITLE: \"My New Post\"\nKICKER: \"Tech · Writing\"\nSUBTITLE: \"A short subtitle.\"\nCLOSING_QUOTE: \"The end.\"\nSIDEBAR_TOC:\n  - NUM: \"I\"\n    TITLE: \"Introduction\"\nSECTIONS:\n  - SECTION:\n      NUM: \"I\"\n      TITLE: \"Introduction\"\n      DROP_CAP: true\n      CONTENT: |\n        First paragraph.\n\n        Second paragraph.\n      COMPONENTS: []",
+    "tags": "Tech · Writing",
+    "readTime": "5 min read",
+    "date": "June 2025"
   }'
 ```
 
@@ -504,9 +540,12 @@ curl -X POST https://www.swayam.space/api/blog \
   -H "x-api-key: your_api_key" \
   -d '{
     "slug": "distributed-101",
-    "yaml": "BLOG_TITLE: \"Intro to Distributed Systems\"\nKICKER: \"Deep Dive · Engineering\"\nSUBTITLE: \"Part 1.\"\nREAD_TIME: \"10 min read\"\nTAGS: \"Distributed · Architecture\"\nDATE: \"June 2025\"\nCLOSING_QUOTE: \"...\"\nSIDEBAR_TOC: []\nSECTIONS:\n  - SECTION:\n      NUM: \"I\"\n      TITLE: \"Introduction\"\n      DROP_CAP: true\n      CONTENT: \"Hello world.\"\n      COMPONENTS: []",
+    "yaml": "BLOG_TITLE: \"Intro to Distributed Systems\"\nKICKER: \"Deep Dive · Engineering\"\nSUBTITLE: \"Part 1.\"\nCLOSING_QUOTE: \"...\"\nSIDEBAR_TOC: []\nSECTIONS:\n  - SECTION:\n      NUM: \"I\"\n      TITLE: \"Introduction\"\n      DROP_CAP: true\n      CONTENT: \"Hello world.\"\n      COMPONENTS: []",
     "seriesSlug": "distributed-systems",
-    "seriesDescription": "A deep dive into distributed systems"
+    "seriesDescription": "A deep dive into distributed systems",
+    "tags": "Distributed · Architecture",
+    "readTime": "10 min read",
+    "date": "June 2025"
   }'
 ```
 
@@ -516,7 +555,7 @@ curl -X POST https://www.swayam.space/api/blog \
 curl -X POST https://www.swayam.space/api/blog/validate \
   -H "Content-Type: application/json" \
   -H "x-api-key: your_api_key" \
-  -d '{ "yaml": "BLOG_TITLE: \"Test Post\"\nKICKER: \"Test\"\nSUBTITLE: \"...\"\nREAD_TIME: \"1 min read\"\nTAGS: \"Test\"\nCLOSING_QUOTE: \"...\"\nSIDEBAR_TOC: []\nSECTIONS: []" }'
+  -d '{ "yaml": "BLOG_TITLE: \"Test Post\"\nKICKER: \"Test\"\nSUBTITLE: \"...\"\nCLOSING_QUOTE: \"...\"\nSIDEBAR_TOC: []\nSECTIONS: []" }'
 ```
 
 ### Deactivate a Post

@@ -51,7 +51,7 @@ export function BlogCloser({ quote }: CloserProps) {
 // ── FOOTER ──────────────────────────────────────────────────
 
 interface FooterProps {
-  tags: string;
+  tags?: string;
   title: string;
   date?: string;
 }

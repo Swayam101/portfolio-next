@@ -1,6 +1,6 @@
 // components/blog/BlogPage.tsx
 import React from "react";
-import type { BlogPostWithSlug, BlogSeriesGroup } from "@/types/blog";
+import type { BlogPostWithSlug, BlogSeriesGroup } from "@/features/blog/types";
 import { BlogMasthead } from "./BlogMasthead";
 import { BlogHero } from "./BlogHero";
 import { BlogBylineBar } from "./BlogBylineBar";
@@ -27,7 +27,7 @@ export function BlogPage({ post, series }: Props) {
         WebkitFontSmoothing: "antialiased",
       }}
     >
-      <BlogMasthead tags={post.TAGS} />
+      <BlogMasthead tags={post.tags} />
 
       <BlogHero
         kicker={post.KICKER}
@@ -36,9 +36,10 @@ export function BlogPage({ post, series }: Props) {
       />
 
       <BlogBylineBar
-        readTime={post.READ_TIME}
-        tags={post.TAGS}
-        date={post.DATE}
+        readTime={post.readTime}
+        tags={post.tags}
+        date={post.date}
+        category={post.category}
       />
 
       {series && <BlogSeriesNav currentSlug={post.slug} series={series} />}
@@ -63,9 +64,9 @@ export function BlogPage({ post, series }: Props) {
 
       {/* ── FOOTER ── */}
       <BlogFooter
-        tags={post.TAGS}
+        tags={post.tags}
         title={post.BLOG_TITLE}
-        date={post.DATE}
+        date={post.date}
       />
     </div>
   );

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import BounceInScale from "../components/ui/BounceInScale";
 
 export default function ContactFormSection() {

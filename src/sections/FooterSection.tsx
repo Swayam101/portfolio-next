@@ -207,7 +207,7 @@ export default function FooterCTA({
               color: C.frozenWater,
               margin: 0,
             }}>
-              LET'S BUILD
+              LET&apos;S BUILD
             </div>
           </div>
 

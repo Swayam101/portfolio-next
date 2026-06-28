@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";
-import { YamlBlogPostModel } from "@/models/YamlBlogPost";
-import { parseBlogYaml } from "@/lib/parseBlogYaml";
+import { parseBlogYaml } from "@/features/blog/parseYaml";
 import { revalidatePath } from "next/cache";
 import { checkApiKey } from "@/lib/adminAuth";
+import { BLOG_CATEGORIES } from "@/features/blog/types";
+import {
+  listPostsForAdmin,
+  upsertPost,
+  getExistingSeriesSlug,
+  cleanupOrphanedSeries,
+} from "@/features/blog/db";
+
+const VALID_CATEGORIES = BLOG_CATEGORIES.map((c) => c.slug);
 
 export const dynamic = "force-dynamic";
 
@@ -12,11 +19,10 @@ export async function GET(req: NextRequest) {
   if (authError) return authError;
 
   try {
-    await dbConnect();
-
     const { searchParams } = new URL(req.url);
-    const search = searchParams.get("search")?.trim();
-    const seriesFilter = searchParams.get("series")?.trim();
+    const search = searchParams.get("search")?.trim() || undefined;
+    const seriesFilter = searchParams.get("series")?.trim() || undefined;
+    const categoryFilter = searchParams.get("category")?.trim() || undefined;
     const showAll = searchParams.get("all") === "true";
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const limit = Math.min(
@@ -24,105 +30,26 @@ export async function GET(req: NextRequest) {
       Math.max(1, parseInt(searchParams.get("limit") || "20", 10))
     );
 
-    const query: Record<string, unknown> = {};
-    if (!showAll) {
-      query.active = true;
-    }
-    if (seriesFilter) {
-      query.seriesSlug = seriesFilter;
-    }
-
-    const allDocs = await YamlBlogPostModel.find(query)
-      .sort({ createdAt: -1 })
-      .select("slug yaml seriesSlug seriesDescription active createdAt")
-      .lean();
-
-    interface ParsedEntry {
-      slug: string;
-      BLOG_TITLE: string;
-      TAGS: string;
-      SUBTITLE: string;
-      seriesSlug?: string;
-      seriesDescription?: string;
-      active: boolean;
-      createdAt: Date;
-      [key: string]: unknown;
-    }
-
-    // Parse each doc once, attach parsed data, then filter
-    const parsedDocs: ParsedEntry[] = [];
-    for (const doc of allDocs) {
-      try {
-        const post = parseBlogYaml(doc.yaml);
-        parsedDocs.push({
-          ...post,
-          slug: doc.slug,
-          seriesSlug: doc.seriesSlug || undefined,
-          seriesDescription: doc.seriesDescription || undefined,
-          active: doc.active,
-          createdAt: doc.createdAt,
-        });
-      } catch {
-        // skip unparseable posts
-      }
-    }
-
-    // Search filter on already-parsed data (no double parse)
-    let filtered = parsedDocs;
-    if (search) {
-      const lower = search.toLowerCase();
-      filtered = parsedDocs.filter(
-        (p) =>
-          p.BLOG_TITLE.toLowerCase().includes(lower) ||
-          p.TAGS.toLowerCase().includes(lower) ||
-          p.SUBTITLE.toLowerCase().includes(lower)
+    if (
+      categoryFilter &&
+      !VALID_CATEGORIES.includes(categoryFilter as (typeof VALID_CATEGORIES)[number])
+    ) {
+      return NextResponse.json(
+        { error: "Invalid category filter" },
+        { status: 400 }
       );
     }
 
-    const total = filtered.length;
-    const start = (page - 1) * limit;
-    const paginatedDocs = filtered.slice(start, start + limit);
+    const result = await listPostsForAdmin({
+      search,
+      seriesSlug: seriesFilter,
+      category: categoryFilter,
+      showAll,
+      page,
+      limit,
+    });
 
-    const seriesMap = new Map<
-      string,
-      {
-        seriesSlug: string;
-        seriesDescription: string;
-        posts: ParsedEntry[];
-      }
-    >();
-    const standalone: ParsedEntry[] = [];
-
-    for (const doc of paginatedDocs) {
-      const sSlug = doc.seriesSlug?.trim();
-      if (sSlug) {
-        const existing = seriesMap.get(sSlug);
-        if (existing) {
-          existing.posts.push(doc);
-          if (!existing.seriesDescription && doc.seriesDescription) {
-            existing.seriesDescription = doc.seriesDescription;
-          }
-        } else {
-          seriesMap.set(sSlug, {
-            seriesSlug: sSlug,
-            seriesDescription: doc.seriesDescription ?? "",
-            posts: [doc],
-          });
-        }
-      } else {
-        standalone.push(doc);
-      }
-    }
-
-    const series = Array.from(seriesMap.values()).map((group) => ({
-      ...group,
-      posts: [...group.posts].sort(
-        (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      ),
-    }));
-
-    return NextResponse.json({ total, page, limit, series, standalone });
+    return NextResponse.json(result);
   } catch (error) {
     console.error("[API /api/blog] Error listing posts:", error);
     return NextResponse.json(
@@ -138,7 +65,7 @@ export async function POST(req: NextRequest) {
     if (authError) return authError;
 
     const body = await req.json();
-    const { slug, yaml, seriesSlug, seriesDescription } = body;
+    const { slug, yaml, seriesSlug, seriesDescription, category } = body;
 
     if (!slug || typeof slug !== "string") {
       return NextResponse.json(
@@ -154,7 +81,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate slug format: lowercase alphanumeric + hyphens only
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
       return NextResponse.json(
         {
@@ -165,7 +91,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate the YAML against our schema
     try {
       parseBlogYaml(yaml);
     } catch (err: unknown) {
@@ -177,49 +102,47 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await dbConnect();
+    if (
+      typeof category === "string" &&
+      category !== "" &&
+      !VALID_CATEGORIES.includes(category as (typeof VALID_CATEGORIES)[number])
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid category. Must be one of: " + VALID_CATEGORIES.join(", "),
+        },
+        { status: 400 }
+      );
+    }
 
-    // Check if an existing post with this slug exists (for series cleanup)
-    const existing = await YamlBlogPostModel.findOne({ slug })
-      .select("seriesSlug")
-      .lean();
+    const oldSeriesSlug = await getExistingSeriesSlug(slug);
 
-    const update: Record<string, string> = { slug, yaml };
+    const metadata: Record<string, string | undefined> = {
+      tags: body.tags,
+      readTime: body.readTime,
+      date: body.date,
+      category: body.category,
+      seoTitle: body.seoTitle,
+      seoDescription: body.seoDescription,
+      ogImage: body.ogImage,
+    };
     if (typeof seriesSlug === "string" && seriesSlug.trim()) {
-      update.seriesSlug = seriesSlug.trim();
+      metadata.seriesSlug = seriesSlug.trim();
     }
     if (typeof seriesDescription === "string" && seriesDescription.trim()) {
-      update.seriesDescription = seriesDescription.trim();
+      metadata.seriesDescription = seriesDescription.trim();
     }
 
-    // Upsert the post — new posts default to active: true
-    const result = await YamlBlogPostModel.findOneAndUpdate(
-      { slug },
-      { $set: update, $setOnInsert: { active: true } },
-      { upsert: true, new: true }
-    );
+    await upsertPost(slug, yaml, metadata);
 
-    // If the post changed series or left a series, clean up the old series
-    if (existing?.seriesSlug) {
-      const oldSeriesSlug = existing.seriesSlug;
+    if (oldSeriesSlug) {
       const newSeriesSlug =
         typeof seriesSlug === "string" && seriesSlug.trim()
           ? seriesSlug.trim()
           : undefined;
-
       if (oldSeriesSlug !== newSeriesSlug) {
-        // Check if any other posts still reference the old series
-        const remaining = await YamlBlogPostModel.countDocuments({
-          seriesSlug: oldSeriesSlug,
-          slug: { $ne: slug },
-        });
-
-        if (remaining === 0) {
-          await YamlBlogPostModel.updateMany(
-            { seriesSlug: oldSeriesSlug, slug: { $ne: slug } },
-            { $unset: { seriesSlug: "", seriesDescription: "" } }
-          );
-        }
+        await cleanupOrphanedSeries(oldSeriesSlug, slug);
       }
     }
 
@@ -227,7 +150,7 @@ export async function POST(req: NextRequest) {
     revalidatePath(`/blog/${slug}`);
 
     return NextResponse.json(
-      { message: "Blog post saved successfully", slug: result.slug },
+      { message: "Blog post saved successfully", slug },
       { status: 200 }
     );
   } catch (error) {

@@ -55,7 +55,7 @@ const CTASection: React.FC = () => {
     >
       <div className="z-10 w-full max-w-3xl mx-auto py-20 flex flex-col sm:gap-4 gap-2">
         <BounceInScale as="h2" start="top 75%" duration={1} delay={0} className="text-5xl font-bold text-[var(--pale-sky)] mb-4">
-          Got a project? Let's talk.
+          Got a project? Let&apos;s talk.
         </BounceInScale>
         <BounceInScale as="p" start="top 75%" duration={1} delay={0.15} style={{ fontWeight: 500 }} className="text-2xl text-[white] leading-[42px] sn-pro">
           I turn ambitious ideas into digital products that pull their weight.

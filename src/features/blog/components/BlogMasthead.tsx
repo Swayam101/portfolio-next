@@ -3,7 +3,7 @@ import React from "react";
 import Link from "next/link";
 
 interface Props {
-  tags: string;
+  tags?: string;
 }
 
 export function BlogMasthead({ tags }: Props) {

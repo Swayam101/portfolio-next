@@ -125,17 +125,17 @@ const AboutMeSection: React.FC = () => {
         </ScrollReveal>
         <ScrollReveal distance={40} duration={0.8} delay={0.1} start="top 80%">
           <p style={{fontWeight: 600}} className="text-4xl text-[var(--pacific-blue)] leading-[42px] sn-pro ">
-            I'm <span className="text-[var(--yale-blue)]">Swayam</span> — I build software that works, and works fast.
+            I&apos;m <span className="text-[var(--yale-blue)]">Swayam</span> — I build software that works, and works fast.
           </p>
         </ScrollReveal>
         <ScrollReveal distance={40} duration={0.8} delay={0.2} start="top 80%">
           <p style={{fontWeight: 100}} className="sm:text-xl text-base text-[var(--yale-blue)] text-justify sn-pro py-8">
-            Full-stack freelancer with 3 years of experience building web software that's clean, fast, and built to last. I've worked across the full stack — from pixel-perfect frontends to rock-solid backends — and I know what it takes to turn a rough idea into a product people actually use. I don't just write code, I think about the problem first, ask the right questions, and make sure what gets built is exactly what needs to exist.
+            Full-stack freelancer with 3 years of experience building web software that&apos;s clean, fast, and built to last. I&apos;ve worked across the full stack — from pixel-perfect frontends to rock-solid backends — and I know what it takes to turn a rough idea into a product people actually use. I don&apos;t just write code, I think about the problem first, ask the right questions, and make sure what gets built is exactly what needs to exist.
           </p>
         </ScrollReveal>
         <ScrollReveal distance={40} duration={0.8} delay={0.3} start="top 80%">
           <p style={{fontWeight: 100}} className="sm:text-xl text-base text-[var(--yale-blue)] text-justify sn-pro">
-            My process is simple but the results aren't average. I cut the noise, skip the over-engineering, and ship with the kind of attention to craft most developers save for their own side projects. Whether it's a product starting from a blank file or an existing system that needs serious untangling, I bring the same focus and care every single time. Clean architecture, sharp execution, zero unnecessary back-and-forth.
+            My process is simple but the results aren&apos;t average. I cut the noise, skip the over-engineering, and ship with the kind of attention to craft most developers save for their own side projects. Whether it&apos;s a product starting from a blank file or an existing system that needs serious untangling, I bring the same focus and care every single time. Clean architecture, sharp execution, zero unnecessary back-and-forth.
           </p>
         </ScrollReveal>
         <div

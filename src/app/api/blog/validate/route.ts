@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseBlogYaml } from "@/lib/parseBlogYaml";
+import { parseBlogYaml } from "@/features/blog/parseYaml";
 import { checkApiKey } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
