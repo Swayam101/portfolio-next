@@ -100,6 +100,8 @@ export interface BlogMetadata {
 export interface YamlBlogPost {
   slug: string;
   yaml: string;
+  yamlHindi?: string;
+  yamlHinglish?: string;
   seriesSlug?: string;
   seriesDescription?: string;
   active: boolean;
@@ -120,6 +122,8 @@ export type BlogPostWithSlug = BlogPost &
     slug: string;
     seriesSlug?: string;
     seriesDescription?: string;
+    parsedHindi?: BlogPost;
+    parsedHinglish?: BlogPost;
   };
 
 /** A group of posts belonging to the same series */

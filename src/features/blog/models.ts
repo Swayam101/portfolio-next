@@ -5,6 +5,8 @@ const YamlBlogPostSchema = new Schema<YamlBlogPost>(
   {
     slug: { type: String, required: true, unique: true, index: true },
     yaml: { type: String, required: true },
+    yamlHindi: { type: String },
+    yamlHinglish: { type: String },
     seriesSlug: { type: String, index: true },
     seriesDescription: { type: String },
     active: { type: Boolean, default: true, index: true },

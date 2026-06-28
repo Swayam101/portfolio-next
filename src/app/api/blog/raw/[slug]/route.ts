@@ -21,6 +21,8 @@ export async function GET(
     return NextResponse.json({
       slug: doc.slug,
       yaml: doc.yaml,
+      yamlHindi: doc.yamlHindi,
+      yamlHinglish: doc.yamlHinglish,
       seriesSlug: doc.seriesSlug || undefined,
       seriesDescription: doc.seriesDescription || undefined,
       active: doc.active,

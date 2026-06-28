@@ -22,11 +22,24 @@ export async function GET(
 
     try {
       const post = parseBlogYaml(doc.yaml);
+      
+      let parsedHindi;
+      if (doc.yamlHindi && doc.yamlHindi.trim()) {
+        try { parsedHindi = parseBlogYaml(doc.yamlHindi); } catch {}
+      }
+      
+      let parsedHinglish;
+      if (doc.yamlHinglish && doc.yamlHinglish.trim()) {
+        try { parsedHinglish = parseBlogYaml(doc.yamlHinglish); } catch {}
+      }
+      
       return NextResponse.json({
         ...post,
         slug: doc.slug,
         seriesSlug: doc.seriesSlug || undefined,
         seriesDescription: doc.seriesDescription || undefined,
+        parsedHindi,
+        parsedHinglish,
         active: doc.active,
         tags: doc.tags,
         readTime: doc.readTime,

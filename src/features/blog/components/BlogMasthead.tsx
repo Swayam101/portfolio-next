@@ -4,9 +4,10 @@ import Link from "next/link";
 
 interface Props {
   tags?: string;
+  actions?: React.ReactNode;
 }
 
-export function BlogMasthead({ tags }: Props) {
+export function BlogMasthead({ tags, actions }: Props) {
   return (
     <div
       className="bg-[#1a2e3b] border-b-[3px] border-[#5bbfbf]"
@@ -20,12 +21,21 @@ export function BlogMasthead({ tags }: Props) {
         >
           ← swayam.space
         </Link>
-        <Link
-          href="/blog"
-          className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#5bbfbf] no-underline hover:text-[#8dd9d9] transition-colors duration-150"
-        >
-          All Posts
-        </Link>
+
+        {actions ? (
+          /* When actions are passed, render them here (position: relative on parent handles the alignment) */
+          <div style={{ position: "relative" }}>
+            {actions}
+          </div>
+        ) : (
+          /* Otherwise show the fallback navigation link */
+          <Link
+            href="/blog"
+            className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#5bbfbf] no-underline hover:text-[#8dd9d9] transition-colors duration-150"
+          >
+            All Posts
+          </Link>
+        )}
       </div>
 
       {/* Kicker strip — topic labels, shown in full on desktop */}

@@ -21,7 +21,7 @@ export const SCHEMA_PROMPT = `You are a blog post YAML generator. Given raw blog
 
 BLOG_TITLE: "The main visible headline"
 KICKER: "Category · Tag (e.g. Deep Dive · Engineering)"
-SUBTITLE: "A hook or subtitle beneath the title"
+SUBTITLE: "A hook or subtitle beneath the title">
 CLOSING_QUOTE: "A powerful quote to end the post"
 SIDEBAR_TOC:
   - NUM: "I"

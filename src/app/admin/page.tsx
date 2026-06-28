@@ -26,6 +26,8 @@ export default function AdminPage() {
   // Editor state
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [yaml, setYaml] = useState(EMPTY_YAML);
+  const [yamlHindi, setYamlHindi] = useState("");
+  const [yamlHinglish, setYamlHinglish] = useState("");
   const [newSlug, setNewSlug] = useState("");
   const [seriesSlug, setSeriesSlug] = useState("");
   const [seriesDescription, setSeriesDescription] = useState("");
@@ -110,6 +112,8 @@ export default function AdminPage() {
         const data: RawPost = await res.json();
         setEditingSlug(slug);
         setYaml(data.yaml);
+        setYamlHindi(data.yamlHindi || "");
+        setYamlHinglish(data.yamlHinglish || "");
         setNewSlug(slug);
         setSeriesSlug(data.seriesSlug || "");
         setSeriesDescription(data.seriesDescription || "");
@@ -128,6 +132,8 @@ export default function AdminPage() {
     } else {
       setEditingSlug(null);
       setYaml(EMPTY_YAML);
+      setYamlHindi("");
+      setYamlHinglish("");
       setNewSlug("");
       setSeriesSlug("");
       setSeriesDescription("");
@@ -139,11 +145,11 @@ export default function AdminPage() {
     setView("editor");
   };
 
-  const handleValidate = async () => {
+  const handleValidate = async (yamlToValidate: string) => {
     setValidating(true);
     setValidationResult(null);
     try {
-      const res = await fetch("/api/blog/validate", { method: "POST", headers, body: JSON.stringify({ yaml }) });
+      const res = await fetch("/api/blog/validate", { method: "POST", headers, body: JSON.stringify({ yaml: yamlToValidate }) });
       const data = await res.json();
       setValidationResult(data);
       if (data.valid) showToast("YAML is valid", "success");
@@ -159,6 +165,8 @@ export default function AdminPage() {
     setSaving(true);
     try {
       const body: Record<string, string> = { slug: newSlug.trim(), yaml };
+      if (yamlHindi.trim()) body.yamlHindi = yamlHindi.trim();
+      if (yamlHinglish.trim()) body.yamlHinglish = yamlHinglish.trim();
       if (seriesSlug.trim()) body.seriesSlug = seriesSlug.trim();
       if (seriesDescription.trim()) body.seriesDescription = seriesDescription.trim();
       if (metaTags) body.tags = metaTags;
@@ -205,6 +213,8 @@ export default function AdminPage() {
 
   const handleUseInEditor = () => {
     setYaml(`${SCHEMA_PROMPT}\n\n---\n\nBLOG CONTENT:\n\n${genInput}`);
+    setYamlHindi("");
+    setYamlHinglish("");
     setEditingSlug(null);
     setNewSlug("");
     setValidationResult(null);
@@ -226,10 +236,10 @@ export default function AdminPage() {
             onSearchChange={setSearch} onSeriesChange={setFilterSeries} onEdit={openEditor} onToggleActive={handleToggleActive} onNew={() => openEditor()} />
         )}
         {view === "editor" && (
-          <EditorView editingSlug={editingSlug} yaml={yaml} newSlug={newSlug} seriesSlug={seriesSlug} seriesDescription={seriesDescription} active={editingActive}
+          <EditorView editingSlug={editingSlug} yaml={yaml} yamlHindi={yamlHindi} yamlHinglish={yamlHinglish} newSlug={newSlug} seriesSlug={seriesSlug} seriesDescription={seriesDescription} active={editingActive}
             metaTags={metaTags} metaReadTime={metaReadTime} metaDate={metaDate} metaCategory={metaCategory} metaSeoTitle={metaSeoTitle} metaSeoDescription={metaSeoDescription} metaOgImage={metaOgImage}
             validationResult={validationResult} saving={saving} validating={validating}
-            onYamlChange={setYaml} onSlugChange={setNewSlug} onSeriesSlugChange={setSeriesSlug} onSeriesDescChange={setSeriesDescription}
+            onYamlChange={setYaml} onYamlHindiChange={setYamlHindi} onYamlHinglishChange={setYamlHinglish} onSlugChange={setNewSlug} onSeriesSlugChange={setSeriesSlug} onSeriesDescChange={setSeriesDescription}
             onMetaTagsChange={setMetaTags} onMetaReadTimeChange={setMetaReadTime} onMetaDateChange={setMetaDate} onMetaCategoryChange={setMetaCategory}
             onMetaSeoTitleChange={setMetaSeoTitle} onMetaSeoDescriptionChange={setMetaSeoDescription} onMetaOgImageChange={setMetaOgImage}
             onValidate={handleValidate} onSave={handleSave} onBack={() => setView("dashboard")} />

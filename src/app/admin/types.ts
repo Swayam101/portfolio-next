@@ -22,6 +22,8 @@ export interface Series {
 export interface RawPost {
   slug: string;
   yaml: string;
+  yamlHindi?: string;
+  yamlHinglish?: string;
   seriesSlug?: string;
   seriesDescription?: string;
   active: boolean;

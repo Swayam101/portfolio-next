@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     if (authError) return authError;
 
     const body = await req.json();
-    const { slug, yaml, seriesSlug, seriesDescription, category } = body;
+    const { slug, yaml, yamlHindi, yamlHinglish, seriesSlug, seriesDescription, category } = body;
 
     if (!slug || typeof slug !== "string") {
       return NextResponse.json(
@@ -93,6 +93,8 @@ export async function POST(req: NextRequest) {
 
     try {
       parseBlogYaml(yaml);
+      if (yamlHindi && typeof yamlHindi === "string" && yamlHindi.trim()) parseBlogYaml(yamlHindi);
+      if (yamlHinglish && typeof yamlHinglish === "string" && yamlHinglish.trim()) parseBlogYaml(yamlHinglish);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Unknown validation error";
@@ -134,7 +136,7 @@ export async function POST(req: NextRequest) {
       metadata.seriesDescription = seriesDescription.trim();
     }
 
-    await upsertPost(slug, yaml, metadata);
+    await upsertPost(slug, yaml, yamlHindi, yamlHinglish, metadata);
 
     if (oldSeriesSlug) {
       const newSeriesSlug =

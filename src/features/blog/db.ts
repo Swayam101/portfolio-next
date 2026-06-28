@@ -12,20 +12,33 @@ import { BLOG_CATEGORIES } from "@/features/blog/types";
 
 type LeanDoc = Pick<
   YamlBlogPost,
-  "slug" | "yaml" | "seriesSlug" | "seriesDescription" | "active" | "createdAt" | "tags" | "readTime" | "date" | "category" | "seoTitle" | "seoDescription" | "ogImage"
+  "slug" | "yaml" | "yamlHindi" | "yamlHinglish" | "seriesSlug" | "seriesDescription" | "active" | "createdAt" | "tags" | "readTime" | "date" | "category" | "seoTitle" | "seoDescription" | "ogImage"
 >;
 
 const POST_FIELDS =
-  "slug yaml seriesSlug seriesDescription createdAt tags readTime date category seoTitle seoDescription ogImage";
+  "slug yaml yamlHindi yamlHinglish seriesSlug seriesDescription createdAt tags readTime date category seoTitle seoDescription ogImage";
 
 function docToPost(doc: LeanDoc): BlogPostWithSlug | null {
   try {
     const post = parseBlogYaml(doc.yaml);
+    
+    let parsedHindi;
+    if (doc.yamlHindi && doc.yamlHindi.trim()) {
+      try { parsedHindi = parseBlogYaml(doc.yamlHindi); } catch {}
+    }
+    
+    let parsedHinglish;
+    if (doc.yamlHinglish && doc.yamlHinglish.trim()) {
+      try { parsedHinglish = parseBlogYaml(doc.yamlHinglish); } catch {}
+    }
+
     return {
       ...post,
       slug: doc.slug,
       seriesSlug: doc.seriesSlug || undefined,
       seriesDescription: doc.seriesDescription || undefined,
+      parsedHindi,
+      parsedHinglish,
       tags: doc.tags,
       readTime: doc.readTime,
       date: doc.date,
@@ -209,12 +222,20 @@ export async function listPostsForAdmin(
 export async function upsertPost(
   slug: string,
   yaml: string,
+  yamlHindi: string | undefined,
+  yamlHinglish: string | undefined,
   metadata: Record<string, string | undefined>
 ): Promise<{ slug: string }> {
   await dbConnect();
 
   const setFields: Record<string, string> = { slug, yaml };
   const unsetFields: Record<string, "" > = {};
+
+  if (yamlHindi && yamlHindi.trim()) setFields.yamlHindi = yamlHindi;
+  else unsetFields.yamlHindi = "";
+
+  if (yamlHinglish && yamlHinglish.trim()) setFields.yamlHinglish = yamlHinglish;
+  else unsetFields.yamlHinglish = "";
 
   for (const [key, value] of Object.entries(metadata)) {
     if (value === undefined) continue;
@@ -284,7 +305,7 @@ export async function getRawPost(slug: string) {
   await dbConnect();
   return YamlBlogPostModel.findOne({ slug })
     .select(
-      "slug yaml seriesSlug seriesDescription active createdAt updatedAt tags readTime date category seoTitle seoDescription ogImage"
+      "slug yaml yamlHindi yamlHinglish seriesSlug seriesDescription active createdAt updatedAt tags readTime date category seoTitle seoDescription ogImage"
     )
     .lean();
 }

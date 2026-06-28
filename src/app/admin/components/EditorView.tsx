@@ -10,6 +10,8 @@ import { QuickInsertToolbar } from "./QuickInsertToolbar";
 interface Props {
   editingSlug: string | null;
   yaml: string;
+  yamlHindi: string;
+  yamlHinglish: string;
   newSlug: string;
   seriesSlug: string;
   seriesDescription: string;
@@ -25,6 +27,8 @@ interface Props {
   saving: boolean;
   validating: boolean;
   onYamlChange: (v: string) => void;
+  onYamlHindiChange: (v: string) => void;
+  onYamlHinglishChange: (v: string) => void;
   onSlugChange: (v: string) => void;
   onSeriesSlugChange: (v: string) => void;
   onSeriesDescChange: (v: string) => void;
@@ -35,7 +39,7 @@ interface Props {
   onMetaSeoTitleChange: (v: string) => void;
   onMetaSeoDescriptionChange: (v: string) => void;
   onMetaOgImageChange: (v: string) => void;
-  onValidate: () => void;
+  onValidate: (yaml: string) => void;
   onSave: () => void;
   onBack: () => void;
 }
@@ -50,38 +54,42 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function EditorView({
-  editingSlug, yaml, newSlug, seriesSlug, seriesDescription, active,
+  editingSlug, yaml, yamlHindi, yamlHinglish, newSlug, seriesSlug, seriesDescription, active,
   metaTags, metaReadTime, metaDate, metaCategory, metaSeoTitle, metaSeoDescription, metaOgImage,
   validationResult, saving, validating,
-  onYamlChange, onSlugChange, onSeriesSlugChange, onSeriesDescChange,
+  onYamlChange, onYamlHindiChange, onYamlHinglishChange, onSlugChange, onSeriesSlugChange, onSeriesDescChange,
   onMetaTagsChange, onMetaReadTimeChange, onMetaDateChange, onMetaCategoryChange,
   onMetaSeoTitleChange, onMetaSeoDescriptionChange, onMetaOgImageChange,
   onValidate, onSave, onBack,
 }: Props) {
   const [tab, setTab] = useState<"yaml" | "settings">("yaml");
+  const [yamlTab, setYamlTab] = useState<"en" | "hi" | "hinglish">("en");
   const [splitRatio, setSplitRatio] = useState(50);
   const [showPreview, setShowPreview] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const currentYaml = yamlTab === "hi" ? yamlHindi : yamlTab === "hinglish" ? yamlHinglish : yaml;
+  const currentOnChange = yamlTab === "hi" ? onYamlHindiChange : yamlTab === "hinglish" ? onYamlHinglishChange : onYamlChange;
+
   const handleInsert = useCallback((text: string) => {
     const ta = textareaRef.current;
     if (!ta) {
-      onYamlChange(yaml + text);
+      currentOnChange(currentYaml + text);
       return;
     }
     const start = ta.selectionStart;
     const end = ta.selectionEnd;
-    const before = yaml.substring(0, start);
-    const after = yaml.substring(end);
+    const before = currentYaml.substring(0, start);
+    const after = currentYaml.substring(end);
     const newYaml = before + text + after;
-    onYamlChange(newYaml);
+    currentOnChange(newYaml);
     requestAnimationFrame(() => {
       ta.focus();
       const pos = start + text.length;
       ta.selectionStart = pos;
       ta.selectionEnd = pos;
     });
-  }, [yaml, onYamlChange]);
+  }, [currentYaml, currentOnChange]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Tab") {
@@ -91,7 +99,7 @@ export function EditorView({
       const end = ta.selectionEnd;
       const val = ta.value;
       const newYaml = val.substring(0, start) + "  " + val.substring(end);
-      onYamlChange(newYaml);
+      currentOnChange(newYaml);
       requestAnimationFrame(() => { ta.selectionStart = start + 2; ta.selectionEnd = start + 2; });
     }
   };
@@ -132,7 +140,7 @@ export function EditorView({
           )}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={onValidate} disabled={validating} style={{ ...S.btn, opacity: validating ? 0.5 : 1 }}>
+          <button onClick={() => onValidate(currentYaml)} disabled={validating} style={{ ...S.btn, opacity: validating ? 0.5 : 1 }}>
             {validating ? "VALIDATING..." : "VALIDATE"}
           </button>
           <button onClick={onSave} disabled={saving} style={{ ...S.btnPrimary, opacity: saving ? 0.5 : 1 }}>
@@ -237,8 +245,15 @@ export function EditorView({
       {tab === "yaml" && (
         <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 230px)" }}>
           {/* Quick insert toolbar */}
-          <div style={{ padding: "8px 12px", background: "#111f2a", border: "1px solid rgba(91,191,191,0.1)", borderRadius: "4px 4px 0 0", marginBottom: 0 }}>
+          <div style={{ padding: "8px 12px", background: "#111f2a", border: "1px solid rgba(91,191,191,0.1)", borderRadius: "4px 4px 0 0", marginBottom: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <QuickInsertToolbar onInsert={handleInsert} />
+            <div style={{ display: "flex", gap: 4 }}>
+              {(["en", "hi", "hinglish"] as const).map((l) => (
+                <button key={l} onClick={() => setYamlTab(l)} style={{ padding: "4px 8px", background: yamlTab === l ? "rgba(91,191,191,0.2)" : "transparent", color: yamlTab === l ? "#5bbfbf" : "#4a6a7a", border: "1px solid rgba(91,191,191,0.2)", borderRadius: 3, fontSize: 10, fontFamily: "monospace", textTransform: "uppercase", cursor: "pointer" }}>
+                  {l === "en" ? "EN" : l === "hi" ? "HI" : "HINGLISH"}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Split pane */}
@@ -247,8 +262,8 @@ export function EditorView({
             <div style={{ width: showPreview ? `${splitRatio}%` : "100%", display: "flex", flexDirection: "column", position: "relative" }}>
               <textarea
                 ref={textareaRef}
-                value={yaml}
-                onChange={(e) => onYamlChange(e.target.value)}
+                value={currentYaml}
+                onChange={(e) => currentOnChange(e.target.value)}
                 spellCheck={false}
                 style={{
                   flex: 1, padding: "14px 16px", background: "#0a151d", border: "none",
@@ -258,7 +273,7 @@ export function EditorView({
               />
               {/* Line count */}
               <div style={{ position: "absolute", bottom: 8, right: 12, fontFamily: "monospace", fontSize: 10, color: "#4a6a7a" }}>
-                {yaml.split("\n").length} lines · {yaml.length} chars
+                {currentYaml.split("\n").length} lines · {currentYaml.length} chars
               </div>
             </div>
 
@@ -275,7 +290,7 @@ export function EditorView({
             {/* Preview */}
             {showPreview && (
               <div style={{ flex: 1, background: "#f2fafa", overflowY: "auto" }}>
-                <YamlPreview yaml={yaml} />
+                <YamlPreview yaml={currentYaml} />
               </div>
             )}
           </div>
