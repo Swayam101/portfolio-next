@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { BLOG_CATEGORIES } from "@/features/blog/types";
 import type { ValidationResult } from "../types";
 import { S } from "../styles";
 import { YamlPreview } from "./YamlPreview";
 import { QuickInsertToolbar } from "./QuickInsertToolbar";
+import { ImageManager, extractImages } from "./ImageManager";
 
 interface Props {
   editingSlug: string | null;
@@ -62,11 +63,13 @@ export function EditorView({
   onMetaSeoTitleChange, onMetaSeoDescriptionChange, onMetaOgImageChange,
   onValidate, onSave, onBack,
 }: Props) {
-  const [tab, setTab] = useState<"yaml" | "settings">("yaml");
+  const [tab, setTab] = useState<"yaml" | "images" | "settings">("yaml");
   const [yamlTab, setYamlTab] = useState<"en" | "hi" | "hinglish">("en");
   const [splitRatio, setSplitRatio] = useState(50);
   const [showPreview, setShowPreview] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const imageCount = useMemo(() => extractImages(yaml).length, [yaml]);
 
   const currentYaml = yamlTab === "hi" ? yamlHindi : yamlTab === "hinglish" ? yamlHinglish : yaml;
   const currentOnChange = yamlTab === "hi" ? onYamlHindiChange : yamlTab === "hinglish" ? onYamlHinglishChange : onYamlChange;
@@ -165,13 +168,13 @@ export function EditorView({
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid rgba(91,191,191,0.12)" }}>
-        {(["yaml", "settings"] as const).map((t) => (
+        {(["yaml", "images", "settings"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} style={{
             padding: "8px 18px", background: "none", border: "none",
             borderBottom: tab === t ? "2px solid #5bbfbf" : "2px solid transparent",
             color: tab === t ? "#5bbfbf" : "#4a6a7a", fontFamily: "monospace", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
           }}>
-            {t === "yaml" ? "YAML Editor" : "Post Settings"}
+            {t === "yaml" ? "YAML Editor" : t === "images" ? `Images${imageCount > 0 ? ` (${imageCount})` : ""}` : "Post Settings"}
           </button>
         ))}
         {tab === "yaml" && (
@@ -189,6 +192,13 @@ export function EditorView({
           </div>
         )}
       </div>
+
+      {/* Images tab */}
+      {tab === "images" && (
+        <div style={{ padding: "4px 0" }}>
+          <ImageManager yaml={currentYaml} onYamlChange={currentOnChange} />
+        </div>
+      )}
 
       {/* Settings tab */}
       {tab === "settings" && (

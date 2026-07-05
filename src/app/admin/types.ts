@@ -50,3 +50,14 @@ export interface ValidationResult {
   error?: string;
   details?: string;
 }
+
+export interface AdminImage {
+  figureNum: number;
+  sectionNum: string;
+  sectionTitle: string;
+  TITLE: string;
+  DESCRIPTION: string;
+  ASPECT: "hero" | "wide" | "square";
+  PLACEMENT: "after_intro" | "after_first_para" | "end_of_section";
+  SRC: string;
+}

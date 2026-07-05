@@ -16,42 +16,42 @@ const SECTION_TEMPLATE = `
       COMPONENTS: []`;
 
 const CALLOUT_GOLD = `
-        - CALLOUT:
-            STYLE: "gold"
-            TEXT: "Your callout text here."`;
+        - type: "CALLOUT"
+          STYLE: "gold"
+          TEXT: "Your callout text here."`;
 
 const CALLOUT_RED = `
-        - CALLOUT:
-            STYLE: "red"
-            TEXT: "Your callout text here."`;
+        - type: "CALLOUT"
+          STYLE: "red"
+          TEXT: "Your callout text here."`;
 
 const PULL_QUOTE = `
-        - PULL_QUOTE:
-            TEXT: "Your pull quote here."`;
+        - type: "PULL_QUOTE"
+          TEXT: "Your pull quote here."`;
 
 const IMAGE = `
-        - IMAGE:
-            TITLE: "Image caption"
-            DESCRIPTION: "Short description"
-            ASPECT: "wide"
-            PLACEMENT: "end_of_section"
-            SRC: "https://example.com/placeholder-image-1.jpg"`;
+        - type: "IMAGE"
+          TITLE: "Image caption"
+          DESCRIPTION: "Short description"
+          ASPECT: "wide"
+          PLACEMENT: "end_of_section"
+          SRC: "https://example.com/placeholder-image-1.jpg"`;
 
 const STAT_STRIP = `
-        - STAT_STRIP:
-            STATS:
-              - NUM: "73%"
-                LABEL: "Description of stat"
-              - NUM: "10x"
-                LABEL: "Another stat"`;
+        - type: "STAT_STRIP"
+          STATS:
+            - NUM: "73%"
+              LABEL: "Description of stat"
+            - NUM: "10x"
+              LABEL: "Another stat"`;
 
 const GRID = `
-        - GRID:
-            ITEMS:
-              - NUM: "01"
-                LABEL: "Category"
-                TITLE: "Card Title"
-                BODY: "Card body text."`;
+        - type: "GRID"
+          ITEMS:
+            - NUM: "01"
+              LABEL: "Category"
+              TITLE: "Card Title"
+              BODY: "Card body text."`;
 
 const SIDEBAR_ENTRY = `
   - NUM: "II"

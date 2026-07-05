@@ -33,7 +33,7 @@ function normaliseComponent(raw: Record<string, unknown>): BlogComponent | null 
     case "IMAGE":
       return {
         type: "IMAGE",
-        TITLE: (c.TITLE as string) ?? "",
+        TITLE: ((c.CAPTION ?? c.TITLE) as string) ?? "",
         DESCRIPTION: (c.DESCRIPTION as string) ?? "",
         ASPECT: (c.ASPECT as "hero" | "wide" | "square") ?? "wide",
         PLACEMENT: (c.PLACEMENT as "after_intro" | "after_first_para" | "end_of_section") ?? "end_of_section",
@@ -43,7 +43,10 @@ function normaliseComponent(raw: Record<string, unknown>): BlogComponent | null 
     case "STAT_STRIP":
       return {
         type: "STAT_STRIP",
-        STATS: (c.STATS as { NUM: string; LABEL: string }[]) ?? [],
+        STATS: (c.STATS as { NUM?: string; VALUE?: string; LABEL: string; NOTE?: string }[])?.map((s) => ({
+          NUM: (s.NUM ?? s.VALUE ?? "") as string,
+          LABEL: (s.LABEL ?? "") as string,
+        })) ?? [],
       };
 
     case "GRID":
