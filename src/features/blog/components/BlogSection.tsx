@@ -8,6 +8,7 @@ import {
   Callout,
   PullQuote,
 } from "./BlogComponents";
+import { parseInlineMarkdown } from "../inlineMarkdown";
 
 interface Props {
   section: BlogSectionType;
@@ -92,9 +93,8 @@ export function BlogSection({ section, sectionIndex }: Props) {
             className={`mb-[1.4em] text-[#2e4a5a] leading-[1.8] ${s.DROP_CAP && i === 0 ? "drop-cap" : ""
               }`}
             style={{ fontSize: "clamp(16px, 2.2vw, 18px)" }}
-          >
-            {para}
-          </p>
+            dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(para) }}
+          />
           {i === 0 && afterFirst.map((c, j) => renderComponent(c, `af-${j}`))}
         </React.Fragment>
       ))}

@@ -154,3 +154,17 @@ GRID component — use these EXACT field names:
 10. COMPONENTS array can be empty: COMPONENTS: [] — but do not omit the field entirely.
 
 11. Every stat in STAT_STRIP needs both NUM and LABEL. Every grid item needs NUM, LABEL, TITLE, and BODY.`;
+
+export const TRANSLATION_PROMPT = `You are translating a blog post YAML from English to {LANGUAGE}.
+
+RULES:
+1. Output ONLY the translated YAML — same structure, same field names, same component types.
+2. Translate ONLY the content values: BLOG_TITLE, KICKER, SUBTITLE, CLOSING_QUOTE, 
+   CONTENT, TITLE (section titles), TEXT (callouts/pull quotes), BODY (grid items), 
+   LABEL, DESCRIPTION.
+3. Do NOT translate: NUM, ASPECT, PLACEMENT, SRC, STYLE, type, DROP_CAP.
+4. Do NOT change the YAML structure — same sections, same components, same order.
+5. SIDEBAR_TOC titles must exactly match the translated SECTION titles.
+6. For Hindi: use natural Devanagari script, not transliteration.
+7. For Hinglish: use Roman script with a natural mix of Hindi and English words, 
+   the way young Indians actually speak. Keep technical terms in English.`;

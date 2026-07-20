@@ -10,6 +10,7 @@ import { ImageManager, extractImages } from "./ImageManager";
 
 interface Props {
   editingSlug: string | null;
+  rawContent: string;
   yaml: string;
   yamlHindi: string;
   yamlHinglish: string;
@@ -27,6 +28,7 @@ interface Props {
   validationResult: ValidationResult | null;
   saving: boolean;
   validating: boolean;
+  onRawContentChange: (v: string) => void;
   onYamlChange: (v: string) => void;
   onYamlHindiChange: (v: string) => void;
   onYamlHinglishChange: (v: string) => void;
@@ -43,6 +45,8 @@ interface Props {
   onValidate: (yaml: string) => void;
   onSave: () => void;
   onBack: () => void;
+  onCopyTranslationPrompt?: (lang: string) => void;
+  onCopyGeneratePrompt?: () => void;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -55,16 +59,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function EditorView({
-  editingSlug, yaml, yamlHindi, yamlHinglish, newSlug, seriesSlug, seriesDescription, active,
+  editingSlug, rawContent, yaml, yamlHindi, yamlHinglish, newSlug, seriesSlug, seriesDescription, active,
   metaTags, metaReadTime, metaDate, metaCategory, metaSeoTitle, metaSeoDescription, metaOgImage,
   validationResult, saving, validating,
-  onYamlChange, onYamlHindiChange, onYamlHinglishChange, onSlugChange, onSeriesSlugChange, onSeriesDescChange,
+  onRawContentChange, onYamlChange, onYamlHindiChange, onYamlHinglishChange, onSlugChange, onSeriesSlugChange, onSeriesDescChange,
   onMetaTagsChange, onMetaReadTimeChange, onMetaDateChange, onMetaCategoryChange,
   onMetaSeoTitleChange, onMetaSeoDescriptionChange, onMetaOgImageChange,
-  onValidate, onSave, onBack,
+  onValidate, onSave, onBack, onCopyTranslationPrompt, onCopyGeneratePrompt,
 }: Props) {
-  const [tab, setTab] = useState<"yaml" | "images" | "settings">("yaml");
+  const [step, setStep] = useState<"write" | "en" | "translations" | "publish">("write");
   const [yamlTab, setYamlTab] = useState<"en" | "hi" | "hinglish">("en");
+  const [showImages, setShowImages] = useState(false);
   const [splitRatio, setSplitRatio] = useState(50);
   const [showPreview, setShowPreview] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -166,19 +171,35 @@ export function EditorView({
         </div>
       )}
 
-      {/* Tabs */}
+      {/* Steps */}
       <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid rgba(91,191,191,0.12)" }}>
-        {(["yaml", "images", "settings"] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} style={{
+        {(["write", "en", "translations", "publish"] as const).map((s, i) => (
+          <button key={s} onClick={() => {
+            setStep(s);
+            if (s === "en") setYamlTab("en");
+            if (s === "translations" && yamlTab === "en") setYamlTab("hi");
+          }} style={{
             padding: "8px 18px", background: "none", border: "none",
-            borderBottom: tab === t ? "2px solid #5bbfbf" : "2px solid transparent",
-            color: tab === t ? "#5bbfbf" : "#4a6a7a", fontFamily: "monospace", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+            borderBottom: step === s ? "2px solid #5bbfbf" : "2px solid transparent",
+            color: step === s ? "#5bbfbf" : "#4a6a7a", fontFamily: "monospace", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
           }}>
-            {t === "yaml" ? "YAML Editor" : t === "images" ? `Images${imageCount > 0 ? ` (${imageCount})` : ""}` : "Post Settings"}
+            {i + 1}. {s === "write" ? "Write" : s === "en" ? "English" : s === "translations" ? "Translations" : "Publish"}
           </button>
         ))}
-        {tab === "yaml" && (
+        {(step === "en" || step === "translations") && (
           <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+            {step === "en" && (
+              <button
+                onClick={() => setShowImages(!showImages)}
+                style={{
+                  padding: "4px 10px", background: showImages ? "rgba(91,191,191,0.15)" : "transparent",
+                  border: "1px solid rgba(91,191,191,0.2)", borderRadius: 3,
+                  color: showImages ? "#5bbfbf" : "#4a6a7a", fontSize: 10, fontFamily: "monospace", letterSpacing: "0.1em", cursor: "pointer",
+                }}
+              >
+                {showImages ? "Hide Images" : `Images${imageCount > 0 ? ` (${imageCount})` : ""}`}
+              </button>
+            )}
             <button
               onClick={() => setShowPreview(!showPreview)}
               style={{
@@ -193,15 +214,30 @@ export function EditorView({
         )}
       </div>
 
-      {/* Images tab */}
-      {tab === "images" && (
-        <div style={{ padding: "4px 0" }}>
-          <ImageManager yaml={currentYaml} onYamlChange={currentOnChange} />
+      {step === "write" && (
+        <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 200px)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "#8aaab8" }}>Paste your raw content, thoughts, or outline here. Then generate the prompt to send to an LLM.</div>
+            {onCopyGeneratePrompt && (
+              <button onClick={onCopyGeneratePrompt} style={{ ...S.btnPrimary, padding: "6px 12px", fontSize: 11 }}>
+                COPY PROMPT + CONTENT
+              </button>
+            )}
+          </div>
+          <textarea
+            value={rawContent}
+            onChange={(e) => onRawContentChange(e.target.value)}
+            placeholder="Type or paste raw content here..."
+            style={{
+              flex: 1, padding: "16px", background: "#0a151d", border: "1px solid rgba(91,191,191,0.12)",
+              borderRadius: 4, color: "#d4f0f0", fontSize: 14, fontFamily: "'SN Pro', sans-serif", lineHeight: 1.7, resize: "none", outline: "none"
+            }}
+          />
         </div>
       )}
 
-      {/* Settings tab */}
-      {tab === "settings" && (
+      {/* Settings tab (Publish Step) */}
+      {step === "publish" && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
           <Field label="Slug *">
             <input type="text" value={newSlug} onChange={(e) => onSlugChange(e.target.value)} placeholder="my-new-post" style={S.input} />
@@ -252,15 +288,31 @@ export function EditorView({
       )}
 
       {/* YAML tab — split pane */}
-      {tab === "yaml" && (
+      {(step === "en" || step === "translations") && (
         <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 230px)" }}>
+          {step === "en" && showImages && (
+            <div style={{ padding: "12px", background: "#0a151d", border: "1px solid rgba(91,191,191,0.12)", marginBottom: 12, borderRadius: 4 }}>
+              <ImageManager yaml={yaml} onYamlChange={onYamlChange} />
+            </div>
+          )}
+
           {/* Quick insert toolbar */}
           <div style={{ padding: "8px 12px", background: "#111f2a", border: "1px solid rgba(91,191,191,0.1)", borderRadius: "4px 4px 0 0", marginBottom: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <QuickInsertToolbar onInsert={handleInsert} />
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <QuickInsertToolbar onInsert={handleInsert} />
+              {(yamlTab === "hi" || yamlTab === "hinglish") && onCopyTranslationPrompt && (
+                <button
+                  onClick={() => onCopyTranslationPrompt(yamlTab)}
+                  style={{ ...S.btn, padding: "4px 8px", fontSize: 10, background: "rgba(91,191,191,0.1)", color: "#8dd9d9", borderColor: "rgba(91,191,191,0.2)" }}
+                >
+                  COPY PROMPT
+                </button>
+              )}
+            </div>
             <div style={{ display: "flex", gap: 4 }}>
-              {(["en", "hi", "hinglish"] as const).map((l) => (
+              {step === "translations" && (["hi", "hinglish"] as const).map((l) => (
                 <button key={l} onClick={() => setYamlTab(l)} style={{ padding: "4px 8px", background: yamlTab === l ? "rgba(91,191,191,0.2)" : "transparent", color: yamlTab === l ? "#5bbfbf" : "#4a6a7a", border: "1px solid rgba(91,191,191,0.2)", borderRadius: 3, fontSize: 10, fontFamily: "monospace", textTransform: "uppercase", cursor: "pointer" }}>
-                  {l === "en" ? "EN" : l === "hi" ? "HI" : "HINGLISH"}
+                  {l === "hi" ? "HI" : "HINGLISH"}
                 </button>
               ))}
             </div>

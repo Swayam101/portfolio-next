@@ -10,7 +10,6 @@ interface Props {
 
 const NAV_ITEMS = [
   { id: "dashboard" as View, label: "Posts", icon: "◻" },
-  { id: "generate" as View, label: "Generate", icon: "⚡" },
   { id: "editor" as View, label: "Editor", icon: "✎" },
   { id: "series" as View, label: "Series", icon: "▤" },
 ];

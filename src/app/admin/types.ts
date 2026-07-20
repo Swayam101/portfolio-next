@@ -38,7 +38,28 @@ export interface RawPost {
   updatedAt: string;
 }
 
-export type View = "dashboard" | "editor" | "series" | "generate";
+export type View = "dashboard" | "editor" | "series";
+
+export interface LocalDraft {
+  id: string; // e.g. timestamp or uuid
+  title: string; // Used just for display in dashboard
+  rawContent: string;
+  yaml: string;
+  yamlHindi: string;
+  yamlHinglish: string;
+  slug: string;
+  seriesSlug: string;
+  seriesDescription: string;
+  active: boolean;
+  tags: string;
+  readTime: string;
+  date: string;
+  category: string;
+  seoTitle: string;
+  seoDescription: string;
+  ogImage: string;
+  updatedAt: number; // timestamp
+}
 
 export interface Toast {
   message: string;

@@ -220,6 +220,7 @@ export async function listPostsForAdmin(
 }
 
 export async function upsertPost(
+  originalSlug: string | undefined,
   slug: string,
   yaml: string,
   yamlHindi: string | undefined,
@@ -255,7 +256,7 @@ export async function upsertPost(
   }
 
   const result = await YamlBlogPostModel.findOneAndUpdate(
-    { slug },
+    { slug: originalSlug || slug },
     ops,
     { upsert: true, new: true }
   );

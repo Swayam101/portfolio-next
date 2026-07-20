@@ -1,10 +1,11 @@
 "use client";
 
-import type { Post, Series } from "../types";
+import type { Post, Series, LocalDraft } from "../types";
 import { S } from "../styles";
 
 interface Props {
   posts: Post[];
+  drafts: LocalDraft[];
   total: number;
   loading: boolean;
   search: string;
@@ -15,11 +16,13 @@ interface Props {
   onEdit: (slug?: string) => void;
   onToggleActive: (slug: string, currentActive: boolean) => void;
   onNew: () => void;
+  onOpenDraft: (id: string) => void;
+  onDeleteDraft: (id: string) => void;
 }
 
 export function DashboardView({
-  posts, total, loading, search, filterSeries, series,
-  onSearchChange, onSeriesChange, onEdit, onToggleActive, onNew,
+  posts, drafts, total, loading, search, filterSeries, series,
+  onSearchChange, onSeriesChange, onEdit, onToggleActive, onNew, onOpenDraft, onDeleteDraft,
 }: Props) {
   return (
     <>
@@ -32,6 +35,36 @@ export function DashboardView({
           + NEW POST
         </button>
       </div>
+
+      {drafts.length > 0 && (
+        <div style={{ marginBottom: 32 }}>
+          <h2 style={{ ...S.sectionTitle, fontSize: 14, color: "#8aaab8", marginBottom: 12 }}>Local Drafts ({drafts.length})</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {drafts.map((draft) => (
+              <div key={draft.id} style={{ display: "flex", alignItems: "center", gap: 16, padding: "12px 16px", background: "rgba(91,191,191,0.05)", border: "1px dashed rgba(91,191,191,0.2)", borderRadius: 4 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#d4f0f0", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {draft.title}
+                  </div>
+                  <div style={{ fontSize: 11, fontFamily: "monospace", color: "#4a6a7a" }}>
+                    Last edited: {new Date(draft.updatedAt).toLocaleString()}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                  <button onClick={() => onOpenDraft(draft.id)}
+                    style={{ padding: "6px 12px", background: "rgba(91,191,191,0.1)", border: "1px solid rgba(91,191,191,0.2)", borderRadius: 3, color: "#5bbfbf", fontSize: 11, fontFamily: "monospace", cursor: "pointer" }}>
+                    Continue
+                  </button>
+                  <button onClick={() => { if (confirm("Delete this draft permanently?")) onDeleteDraft(draft.id); }}
+                    style={{ padding: "6px 12px", background: "rgba(203,102,102,0.1)", border: "1px solid rgba(203,102,102,0.2)", borderRadius: 3, color: "#cb6666", fontSize: 11, fontFamily: "monospace", cursor: "pointer" }}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
         <input

@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import type { Post, Series, RawPost, View, Toast, ValidationResult } from "./types";
-import { EMPTY_YAML, SCHEMA_PROMPT } from "./constants";
+import type { Post, Series, RawPost, View, Toast, ValidationResult, LocalDraft } from "./types";
+import { EMPTY_YAML, SCHEMA_PROMPT, TRANSLATION_PROMPT } from "./constants";
 import { LoginScreen } from "./components/LoginScreen";
 import { Sidebar } from "./components/Sidebar";
 import { Toast as ToastComp } from "./components/Toast";
 import { DashboardView } from "./components/DashboardView";
 import { EditorView } from "./components/EditorView";
 import { SeriesView } from "./components/SeriesView";
-import { GeneratorView } from "./components/GeneratorView";
 
 export default function AdminPage() {
   const [apiKey, setApiKey] = useState("");
@@ -22,8 +21,21 @@ export default function AdminPage() {
   const [filterSeries, setFilterSeries] = useState("");
   const [total, setTotal] = useState(0);
   const [toast, setToast] = useState<Toast | null>(null);
+  const [drafts, setDrafts] = useState<LocalDraft[]>([]);
+
+  // Load drafts on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("swayam_blog_drafts");
+      if (stored) setDrafts(JSON.parse(stored));
+    } catch (e) {
+      console.error("Failed to load drafts", e);
+    }
+  }, []);
 
   // Editor state
+  const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
+  const [rawContent, setRawContent] = useState("");
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [yaml, setYaml] = useState(EMPTY_YAML);
   const [yamlHindi, setYamlHindi] = useState("");
@@ -42,7 +54,6 @@ export default function AdminPage() {
   const [metaSeoTitle, setMetaSeoTitle] = useState("");
   const [metaSeoDescription, setMetaSeoDescription] = useState("");
   const [metaOgImage, setMetaOgImage] = useState("");
-  const [genInput, setGenInput] = useState("");
 
   const showToast = useCallback((message: string, type: "success" | "error") => {
     setToast({ message, type });
@@ -59,6 +70,48 @@ export default function AdminPage() {
     debounceRef.current = setTimeout(() => setDebouncedSearch(search), 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [search]);
+
+  // Sync active draft to localStorage
+  useEffect(() => {
+    if (!activeDraftId || !authenticated) return;
+    const titleMatch = yaml.match(/^BLOG_TITLE:\s*"?([^"\n]*)"?/);
+    const title = titleMatch?.[1] || newSlug || "Untitled Draft";
+    
+    setDrafts((prev) => {
+      const existing = prev.find(d => d.id === activeDraftId);
+      const updatedDraft: LocalDraft = {
+        id: activeDraftId,
+        title,
+        rawContent,
+        yaml,
+        yamlHindi,
+        yamlHinglish,
+        slug: newSlug,
+        seriesSlug,
+        seriesDescription,
+        active: editingActive,
+        tags: metaTags,
+        readTime: metaReadTime,
+        date: metaDate,
+        category: metaCategory,
+        seoTitle: metaSeoTitle,
+        seoDescription: metaSeoDescription,
+        ogImage: metaOgImage,
+        updatedAt: Date.now()
+      };
+      
+      const isDifferent = !existing || JSON.stringify(existing) !== JSON.stringify(updatedDraft);
+      if (!isDifferent) return prev;
+
+      const newDrafts = existing ? prev.map(d => d.id === activeDraftId ? updatedDraft : d) : [updatedDraft, ...prev];
+      localStorage.setItem("swayam_blog_drafts", JSON.stringify(newDrafts));
+      return newDrafts;
+    });
+  }, [
+    activeDraftId, authenticated, rawContent, yaml, yamlHindi, yamlHinglish, 
+    newSlug, seriesSlug, seriesDescription, editingActive, metaTags, 
+    metaReadTime, metaDate, metaCategory, metaSeoTitle, metaSeoDescription, metaOgImage
+  ]);
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
@@ -110,7 +163,9 @@ export default function AdminPage() {
         const res = await fetch(`/api/blog/raw/${slug}`, { headers });
         if (!res.ok) throw new Error("Failed to fetch post");
         const data: RawPost = await res.json();
+        setActiveDraftId(`draft-${slug}`);
         setEditingSlug(slug);
+        setRawContent("");
         setYaml(data.yaml);
         setYamlHindi(data.yamlHindi || "");
         setYamlHinglish(data.yamlHinglish || "");
@@ -130,7 +185,9 @@ export default function AdminPage() {
         return;
       }
     } else {
+      setActiveDraftId(`draft-${Date.now()}`);
       setEditingSlug(null);
+      setRawContent("");
       setYaml(EMPTY_YAML);
       setYamlHindi("");
       setYamlHinglish("");
@@ -143,6 +200,41 @@ export default function AdminPage() {
     }
     setValidationResult(null);
     setView("editor");
+  };
+
+  const openDraft = (draftId: string) => {
+    const draft = drafts.find(d => d.id === draftId);
+    if (!draft) return;
+    setActiveDraftId(draft.id);
+    setEditingSlug(draft.slug || null);
+    setRawContent(draft.rawContent || "");
+    setYaml(draft.yaml || EMPTY_YAML);
+    setYamlHindi(draft.yamlHindi || "");
+    setYamlHinglish(draft.yamlHinglish || "");
+    setNewSlug(draft.slug || "");
+    setSeriesSlug(draft.seriesSlug || "");
+    setSeriesDescription(draft.seriesDescription || "");
+    setEditingActive(draft.active ?? true);
+    setMetaTags(draft.tags || "");
+    setMetaReadTime(draft.readTime || "");
+    setMetaDate(draft.date || "");
+    setMetaCategory(draft.category || "");
+    setMetaSeoTitle(draft.seoTitle || "");
+    setMetaSeoDescription(draft.seoDescription || "");
+    setMetaOgImage(draft.ogImage || "");
+    setValidationResult(null);
+    setView("editor");
+  };
+
+  const deleteDraft = (draftId: string) => {
+    setDrafts(prev => {
+      const newDrafts = prev.filter(d => d.id !== draftId);
+      localStorage.setItem("swayam_blog_drafts", JSON.stringify(newDrafts));
+      return newDrafts;
+    });
+    if (activeDraftId === draftId) {
+      setView("dashboard");
+    }
   };
 
   const handleValidate = async (yamlToValidate: string) => {
@@ -165,6 +257,7 @@ export default function AdminPage() {
     setSaving(true);
     try {
       const body: Record<string, string> = { slug: newSlug.trim(), yaml };
+      if (editingSlug) body.originalSlug = editingSlug;
       if (yamlHindi.trim()) body.yamlHindi = yamlHindi.trim();
       if (yamlHinglish.trim()) body.yamlHinglish = yamlHinglish.trim();
       if (seriesSlug.trim()) body.seriesSlug = seriesSlug.trim();
@@ -206,19 +299,21 @@ export default function AdminPage() {
     }
   };
 
-  const handleGenerateCopy = () => {
-    navigator.clipboard.writeText(`${SCHEMA_PROMPT}\n\n---\n\nBLOG CONTENT:\n\n${genInput}`);
-    showToast("Prompt + content copied to clipboard", "success");
+  const handleCopyTranslationPrompt = (lang: string) => {
+    const languageMap: Record<string, string> = {
+      hi: "Hindi",
+      hinglish: "Hinglish",
+    };
+    const languageName = languageMap[lang] || lang;
+    const prompt = TRANSLATION_PROMPT.replace("{LANGUAGE}", languageName);
+    const textToCopy = `${prompt}\n\n---\n\nSOURCE YAML:\n\n${yaml}`;
+    navigator.clipboard.writeText(textToCopy);
+    showToast(`Translation prompt for ${languageName} copied`, "success");
   };
 
-  const handleUseInEditor = () => {
-    setYaml(`${SCHEMA_PROMPT}\n\n---\n\nBLOG CONTENT:\n\n${genInput}`);
-    setYamlHindi("");
-    setYamlHinglish("");
-    setEditingSlug(null);
-    setNewSlug("");
-    setValidationResult(null);
-    setView("editor");
+  const handleCopyGeneratePrompt = () => {
+    navigator.clipboard.writeText(`${SCHEMA_PROMPT}\n\n---\n\nBLOG CONTENT:\n\n${rawContent}`);
+    showToast("Prompt + content copied to clipboard", "success");
   };
 
   if (!authenticated) {
@@ -232,20 +327,21 @@ export default function AdminPage() {
 
       <main style={{ flex: 1, padding: "28px 36px", overflowY: "auto" }}>
         {view === "dashboard" && (
-          <DashboardView posts={posts} total={total} loading={loading} search={search} filterSeries={filterSeries} series={series}
-            onSearchChange={setSearch} onSeriesChange={setFilterSeries} onEdit={openEditor} onToggleActive={handleToggleActive} onNew={() => openEditor()} />
+          <DashboardView posts={posts} drafts={drafts} total={total} loading={loading} search={search} filterSeries={filterSeries} series={series}
+            onSearchChange={setSearch} onSeriesChange={setFilterSeries} onEdit={openEditor} onOpenDraft={openDraft} onDeleteDraft={deleteDraft} onToggleActive={handleToggleActive} onNew={() => openEditor()} />
         )}
         {view === "editor" && (
-          <EditorView editingSlug={editingSlug} yaml={yaml} yamlHindi={yamlHindi} yamlHinglish={yamlHinglish} newSlug={newSlug} seriesSlug={seriesSlug} seriesDescription={seriesDescription} active={editingActive}
+          <EditorView
+            editingSlug={editingSlug} rawContent={rawContent} yaml={yaml} yamlHindi={yamlHindi} yamlHinglish={yamlHinglish} newSlug={newSlug} seriesSlug={seriesSlug} seriesDescription={seriesDescription} active={editingActive}
             metaTags={metaTags} metaReadTime={metaReadTime} metaDate={metaDate} metaCategory={metaCategory} metaSeoTitle={metaSeoTitle} metaSeoDescription={metaSeoDescription} metaOgImage={metaOgImage}
             validationResult={validationResult} saving={saving} validating={validating}
-            onYamlChange={setYaml} onYamlHindiChange={setYamlHindi} onYamlHinglishChange={setYamlHinglish} onSlugChange={setNewSlug} onSeriesSlugChange={setSeriesSlug} onSeriesDescChange={setSeriesDescription}
+            onRawContentChange={setRawContent} onYamlChange={setYaml} onYamlHindiChange={setYamlHindi} onYamlHinglishChange={setYamlHinglish} onSlugChange={setNewSlug} onSeriesSlugChange={setSeriesSlug} onSeriesDescChange={setSeriesDescription}
             onMetaTagsChange={setMetaTags} onMetaReadTimeChange={setMetaReadTime} onMetaDateChange={setMetaDate} onMetaCategoryChange={setMetaCategory}
             onMetaSeoTitleChange={setMetaSeoTitle} onMetaSeoDescriptionChange={setMetaSeoDescription} onMetaOgImageChange={setMetaOgImage}
-            onValidate={handleValidate} onSave={handleSave} onBack={() => setView("dashboard")} />
+            onValidate={handleValidate} onSave={handleSave} onBack={() => setView("dashboard")}
+            onCopyTranslationPrompt={handleCopyTranslationPrompt} onCopyGeneratePrompt={handleCopyGeneratePrompt} />
         )}
         {view === "series" && <SeriesView series={series} onRefresh={fetchSeries} onEditPost={openEditor} />}
-        {view === "generate" && <GeneratorView input={genInput} onInputChange={setGenInput} onCopy={handleGenerateCopy} onUseInEditor={handleUseInEditor} />}
       </main>
 
       <style>{`

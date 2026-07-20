@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     if (authError) return authError;
 
     const body = await req.json();
-    const { slug, yaml, yamlHindi, yamlHinglish, seriesSlug, seriesDescription, category } = body;
+    const { originalSlug, slug, yaml, yamlHindi, yamlHinglish, seriesSlug, seriesDescription, category } = body;
 
     if (!slug || typeof slug !== "string") {
       return NextResponse.json(
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
       metadata.seriesDescription = seriesDescription.trim();
     }
 
-    await upsertPost(slug, yaml, yamlHindi, yamlHinglish, metadata);
+    await upsertPost(originalSlug, slug, yaml, yamlHindi, yamlHinglish, metadata);
 
     if (oldSeriesSlug) {
       const newSeriesSlug =

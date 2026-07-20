@@ -101,6 +101,7 @@ function ImageCard({
   onSrcChange: (newSrc: string) => void;
 }) {
   const [inputValue, setInputValue] = useState(image.SRC);
+  const [uploading, setUploading] = useState(false);
   const hasRealUrl = image.SRC && !image.SRC.includes("placeholder");
   const hasInputValue = inputValue && !inputValue.includes("placeholder");
 
@@ -122,6 +123,32 @@ function ImageCard({
     },
     [inputValue, image.SRC, onSrcChange]
   );
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/blog/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      setInputValue(data.url);
+      onSrcChange(data.url);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div
@@ -307,34 +334,45 @@ function ImageCard({
             >
               Image URL
             </label>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              placeholder="https://example.com/image.jpg"
-              style={{
-                width: "100%",
-                padding: "7px 10px",
-                background: "#0d1b24",
-                border: `1px solid ${hasInputValue ? "rgba(91,191,191,0.3)" : "rgba(91,191,191,0.12)"}`,
-                borderRadius: 3,
-                color: hasInputValue ? "#d4f0f0" : "#4a6a7a",
-                fontSize: 12,
-                fontFamily: "monospace",
-                outline: "none",
-                transition: "border-color 0.15s",
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = "rgba(91,191,191,0.5)";
-              }}
-              onBlurCapture={(e) => {
-                e.currentTarget.style.borderColor = hasInputValue
-                  ? "rgba(91,191,191,0.3)"
-                  : "rgba(91,191,191,0.12)";
-              }}
-            />
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                placeholder="https://example.com/image.jpg"
+                style={{
+                  flex: 1,
+                  padding: "7px 10px",
+                  background: "#0d1b24",
+                  border: `1px solid ${hasInputValue ? "rgba(91,191,191,0.3)" : "rgba(91,191,191,0.12)"}`,
+                  borderRadius: 3,
+                  color: hasInputValue ? "#d4f0f0" : "#4a6a7a",
+                  fontSize: 12,
+                  fontFamily: "monospace",
+                  outline: "none",
+                  transition: "border-color 0.15s",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(91,191,191,0.5)";
+                }}
+                onBlurCapture={(e) => {
+                  e.currentTarget.style.borderColor = hasInputValue
+                    ? "rgba(91,191,191,0.3)"
+                    : "rgba(91,191,191,0.12)";
+                }}
+              />
+              <label style={{
+                padding: "7px 12px", background: "rgba(91,191,191,0.1)",
+                border: "1px solid rgba(91,191,191,0.2)", borderRadius: 3,
+                color: "#5bbfbf", fontSize: 11, fontFamily: "monospace", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", minWidth: 80
+              }}>
+                {uploading ? "..." : "Upload"}
+                <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleUpload} disabled={uploading} />
+              </label>
+            </div>
           </div>
         </div>
       </div>
