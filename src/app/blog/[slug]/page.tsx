@@ -1,11 +1,15 @@
 import { notFound } from "next/navigation";
-import { getPostBySlug, getPostSlugs, getPostsBySeriesSlug } from "@/features/blog/db";
+import {
+  getPostBySlug,
+  getPostSlugs,
+  getPostsBySeriesSlug,
+} from "@/features/blog/db";
 import { BlogPage } from "@/features/blog/components/BlogPage";
 import type { Metadata } from "next";
 
 import "../../blog.css";
 
-const BASE_URL = "https://www.swayam.space";
+const BASE_URL = "https://www.swayam.cyou";
 
 export const revalidate = 300; // 5 minutes
 
@@ -25,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (!post) {
       return { title: "Post Not Found | Swayam" };
     }
-    
+
     const title = post.seoTitle || `${post.BLOG_TITLE} | Swayam`;
     const description = post.seoDescription || post.SUBTITLE;
     const ogImage = post.ogImage ?? null;
@@ -59,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  
+
   let post;
   let series = null;
   try {

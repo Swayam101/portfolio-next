@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import MY_PROJECTS from "@/data/projects";
 import type { Project } from "@/types/project";
 
-const BASE_URL = "https://www.swayam.space";
+const BASE_URL = "https://www.swayam.cyou";
 
 export const revalidate = 60;
 
@@ -87,7 +87,11 @@ function SectionHeading({ num, label }: { num: string; label: string }) {
         {num}
       </span>
       <div
-        style={{ flex: 1, height: "1px", background: "rgba(var(--pacific-blue-rgb), 0.18)" }}
+        style={{
+          flex: 1,
+          height: "1px",
+          background: "rgba(var(--pacific-blue-rgb), 0.18)",
+        }}
       />
       <span
         className="font-['Bebas_Neue'] shrink-0 text-[var(--yale-blue)]"
@@ -141,9 +145,29 @@ function ProjectScreenshot({
         fill="none"
         style={{ opacity: 0.22, color: "var(--yale-blue)" }}
       >
-        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.5" />
-        <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="1.5" />
-        <path d="M21 15l-5-5L5 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <rect
+          x="3"
+          y="3"
+          width="18"
+          height="18"
+          rx="2"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <circle
+          cx="8.5"
+          cy="8.5"
+          r="1.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M21 15l-5-5L5 21"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
       <span
         className="font-['Bebas_Neue'] text-[var(--yale-blue)]/25 tracking-[0.3em]"
@@ -178,7 +202,9 @@ export default async function ProjectPage({ params }: Props) {
 
   const projectIndex = MY_PROJECTS.findIndex((p) => p.slug === slug);
   const indexLabel = String(projectIndex + 1).padStart(2, "0");
-  const relatedProjects = MY_PROJECTS.filter((p) => p.slug !== project.slug).slice(0, 2);
+  const relatedProjects = MY_PROJECTS.filter(
+    (p) => p.slug !== project.slug,
+  ).slice(0, 2);
 
   const articleJsonLd = {
     "@context": "https://schema.org",
@@ -200,7 +226,6 @@ export default async function ProjectPage({ params }: Props) {
       <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
 
       <div className="min-h-screen bg-[var(--frozen-water)]">
-
         {/* ── Sticky header ──────────────────────────────────────────── */}
         <header
           className="sticky top-0 z-50 backdrop-blur-sm border-b border-[rgba(var(--pacific-blue-rgb),0.18)]"
@@ -224,7 +249,6 @@ export default async function ProjectPage({ params }: Props) {
 
         {/* ── Hero ───────────────────────────────────────────────────── */}
         <div className="max-w-5xl mx-auto relative overflow-hidden px-6 pt-14 pb-10 sm:pt-18 sm:pb-14">
-
           {/* Giant watermark project number */}
           <div
             aria-hidden
@@ -242,13 +266,21 @@ export default async function ProjectPage({ params }: Props) {
           {/* Breadcrumb */}
           <div className="pfu mb-8" style={{ animationDelay: "0.05s" }}>
             <nav aria-label="Breadcrumb">
-              <ol className="flex items-center gap-[0.45rem] sn-pro" style={{ fontSize: "0.82rem" }}>
+              <ol
+                className="flex items-center gap-[0.45rem] sn-pro"
+                style={{ fontSize: "0.82rem" }}
+              >
                 <li>
-                  <Link href="/" className="text-[var(--pacific-blue)] hover:underline transition-colors">
+                  <Link
+                    href="/"
+                    className="text-[var(--pacific-blue)] hover:underline transition-colors"
+                  >
                     Home
                   </Link>
                 </li>
-                <li className="text-[var(--yale-blue)]/35" aria-hidden>/</li>
+                <li className="text-[var(--yale-blue)]/35" aria-hidden>
+                  /
+                </li>
                 <li className="text-[var(--yale-blue)]/60">{project.title}</li>
               </ol>
             </nav>
@@ -256,10 +288,8 @@ export default async function ProjectPage({ params }: Props) {
 
           {/* Two-column layout: left = info, right = screenshot */}
           <div className="flex flex-col lg:flex-row lg:items-start gap-10 lg:gap-14">
-
             {/* ── LEFT: Title, meta, description, tags ─────────────── */}
             <div className="flex-1 min-w-0">
-
               {/* Title */}
               <h1
                 className="pfu font-['Bebas_Neue'] leading-[0.9] text-[var(--yale-blue)] m-0"
@@ -301,7 +331,10 @@ export default async function ProjectPage({ params }: Props) {
               </p>
 
               {/* Tags */}
-              <div className="pfu flex flex-wrap gap-[0.4rem]" style={{ animationDelay: "0.38s" }}>
+              <div
+                className="pfu flex flex-wrap gap-[0.4rem]"
+                style={{ animationDelay: "0.38s" }}
+              >
                 {project.tags.map((tag) => (
                   <span
                     key={tag}
@@ -361,7 +394,6 @@ export default async function ProjectPage({ params }: Props) {
 
         {/* ── Content sections ───────────────────────────────────────── */}
         <div className="max-w-3xl mx-auto px-6 pb-16">
-
           {/* Rule between hero and body */}
           <div
             className="pdl mb-16"
@@ -373,7 +405,6 @@ export default async function ProjectPage({ params }: Props) {
           />
 
           <div className="space-y-16">
-
             {/* 01 — Overview */}
             {project.overview && (
               <section className="pfu" style={{ animationDelay: "0.58s" }}>
@@ -420,7 +451,9 @@ export default async function ProjectPage({ params }: Props) {
                 <SectionHeading num="03" label="Approach & Decisions" />
                 <div
                   className="pl-5 py-[0.15rem]"
-                  style={{ borderLeft: "2px solid rgba(var(--pacific-blue-rgb),0.32)" }}
+                  style={{
+                    borderLeft: "2px solid rgba(var(--pacific-blue-rgb),0.32)",
+                  }}
                 >
                   <p
                     className="sn-pro text-[var(--yale-blue)]/80 leading-[1.9] m-0"
@@ -501,7 +534,9 @@ export default async function ProjectPage({ params }: Props) {
                       {p.title}
                     </Link>
                     {i < relatedProjects.length - 1 && (
-                      <span className="text-[var(--pacific-blue)]/35 mx-1">,</span>
+                      <span className="text-[var(--pacific-blue)]/35 mx-1">
+                        ,
+                      </span>
                     )}
                   </span>
                 ))}

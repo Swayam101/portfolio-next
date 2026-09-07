@@ -6,7 +6,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.swayam.space"),
+  metadataBase: new URL("https://www.swayam.cyou"),
   title: {
     default: "Full-Stack Developer — Web, Mobile & Backend | Swayam",
     template: "%s | Swayam",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     title: "Full-Stack Developer — Web, Mobile & Backend | Swayam",
     description:
       "Hire a full-stack developer with 3 years of experience. I build clean, fast web software from frontend to backend. Clean architecture, sharp execution.",
-    url: "https://www.swayam.space",
+    url: "https://www.swayam.cyou",
     siteName: "Swayam",
     locale: "en_US",
     images: [
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     site: "@SPrajapat16530",
   },
   alternates: {
-    canonical: "https://www.swayam.space",
+    canonical: "https://www.swayam.cyou",
   },
   icons: {
     icon: "/favicon.ico",
@@ -66,7 +66,7 @@ const personJsonLd = {
   jobTitle: "Full-stack Developer",
   description:
     "Full-stack freelancer with 3 years of experience building web software that's clean, fast, and built to last. I work across the full stack — from pixel-perfect frontends to rock-solid backends.",
-  url: "https://www.swayam.space",
+  url: "https://www.swayam.cyou",
   email: "swayamprajapat21@gmail.com",
   sameAs: [
     "https://github.com/Swayam101",
@@ -94,13 +94,13 @@ const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Swayam Prajapat Portfolio",
-  url: "https://www.swayam.space",
+  url: "https://www.swayam.cyou",
   description:
     "Portfolio of Swayam Prajapat — Full-stack developer specializing in web applications",
   author: {
     "@type": "Person",
     name: "Swayam Prajapat",
-    url: "https://www.swayam.space",
+    url: "https://www.swayam.cyou",
   },
 };
 
@@ -110,22 +110,31 @@ const professionalServiceJsonLd = {
   name: "Swayam — Full-Stack Development",
   description:
     "Freelance full-stack development services. Web, mobile, and backend development with React, Next.js, Node.js, and TypeScript.",
-  url: "https://www.swayam.space",
+  url: "https://www.swayam.cyou",
   provider: {
     "@type": "Person",
     name: "Swayam Prajapat",
     email: "swayamprajapat21@gmail.com",
-    url: "https://www.swayam.space",
+    url: "https://www.swayam.cyou",
   },
   areaServed: "Worldwide",
-  serviceType: ["Web Development", "Full-Stack Development", "Freelance Development"],
+  serviceType: [
+    "Web Development",
+    "Full-Stack Development",
+    "Freelance Development",
+  ],
 };
 
 const breadcrumbHomeJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: "https://www.swayam.space" },
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://www.swayam.cyou",
+    },
   ],
 };
 
@@ -185,7 +194,11 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           rel="stylesheet"
@@ -203,11 +216,15 @@ export default function RootLayout({
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceJsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(professionalServiceJsonLd),
+          }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbHomeJsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbHomeJsonLd),
+          }}
         />
         <script
           type="application/ld+json"

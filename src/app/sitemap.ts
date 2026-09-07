@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import MY_PROJECTS from "@/data/projects";
 import { getPostSlugs } from "@/features/blog/db";
 
-const BASE_URL = "https://www.swayam.space";
+const BASE_URL = "https://www.swayam.cyou";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projects = MY_PROJECTS.map((p) => ({

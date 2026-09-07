@@ -34,7 +34,7 @@ export default async function BlogIndexPage() {
             href="/"
             className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#8dd9d9] no-underline hover:text-white transition-colors duration-150"
           >
-            ← swayam.space
+            ← swayam.cyou
           </Link>
         </div>
         <div className="text-center px-5 py-[10px] font-mono text-[10px] tracking-[0.22em] uppercase text-[#5bbfbf]">
@@ -65,7 +65,10 @@ export default async function BlogIndexPage() {
           <br />
           <span
             className="font-light italic"
-            style={{ fontSize: "clamp(18px, 3vw, 32px)", color: "rgba(141,217,217,0.55)" }}
+            style={{
+              fontSize: "clamp(18px, 3vw, 32px)",
+              color: "rgba(141,217,217,0.55)",
+            }}
           >
             for curious people.
           </span>
@@ -112,7 +115,7 @@ export default async function BlogIndexPage() {
             href="/"
             className="text-[#5bbfbf] no-underline hover:underline transition-colors"
           >
-            swayam.space
+            swayam.cyou
           </Link>
         </div>
       </footer>

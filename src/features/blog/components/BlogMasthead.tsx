@@ -19,14 +19,12 @@ export function BlogMasthead({ tags, actions }: Props) {
           href="/"
           className="font-mono text-[11px] tracking-[0.22em] uppercase text-[#8dd9d9] no-underline hover:text-white transition-colors duration-150"
         >
-          ← swayam.space
+          ← swayam.cyou
         </Link>
 
         {actions ? (
           /* When actions are passed, render them here (position: relative on parent handles the alignment) */
-          <div style={{ position: "relative" }}>
-            {actions}
-          </div>
+          <div style={{ position: "relative" }}>{actions}</div>
         ) : (
           /* Otherwise show the fallback navigation link */
           <Link
@@ -40,7 +38,9 @@ export function BlogMasthead({ tags, actions }: Props) {
 
       {/* Kicker strip — topic labels, shown in full on desktop */}
       <div className="text-center px-5 py-[10px] font-mono text-[10px] tracking-[0.22em] uppercase text-[#5bbfbf]">
-        <span className="hidden sm:inline">Technology &amp; Computing &nbsp;·&nbsp; </span>
+        <span className="hidden sm:inline">
+          Technology &amp; Computing &nbsp;·&nbsp;{" "}
+        </span>
         {tags}
       </div>
     </div>
