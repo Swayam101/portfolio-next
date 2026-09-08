@@ -29,6 +29,21 @@ function useMagnetic(strength = 0.38) {
 function SocialBtn({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
   const ref = useMagnetic(0.45) as React.RefObject<HTMLAnchorElement>;
   const [hov, setHov] = useState(false);
+  
+  const handleClick = () => {
+    // @ts-ignore
+    if (typeof window !== 'undefined' && window.gtag) {
+      // @ts-ignore
+      const linkType = label.toLowerCase();
+      // @ts-ignore
+      window.gtag('event', 'select_content', {
+        content_type: 'external_link',
+        item_id: linkType,
+        destination_url: href,
+      });
+    }
+  };
+
   return (
     <a
       ref={ref as React.RefObject<HTMLAnchorElement>}
@@ -38,6 +53,7 @@ function SocialBtn({ href, label, children }: { href: string; label: string; chi
       rel="noopener noreferrer"
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
+      onClick={handleClick}
       style={{
         width: "52px",
         height: "52px",

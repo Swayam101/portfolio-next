@@ -68,7 +68,18 @@ const CTASection: React.FC = () => {
         <BounceInScale as="div" start="top 75%" duration={0.9} delay={0.45}>
           <a
             href="#contact-form"
-            onClick={(e) => { e.preventDefault(); scrollToSection("contact-form"); }}
+            onClick={(e) => { 
+              e.preventDefault(); 
+              scrollToSection("contact-form");
+              // @ts-ignore
+              if (typeof window !== 'undefined' && window.gtag) {
+                // @ts-ignore
+                window.gtag('event', 'generate_lead', {
+                  cta_text: 'Hit Me Up',
+                  cta_location: 'hero_section',
+                });
+              }
+            }}
             className="text-2xl font-black tracking-wide rounded-xl px-6 py-4
               bg-[var(--pale-sky)]
               text-[var(--yale-blue)]

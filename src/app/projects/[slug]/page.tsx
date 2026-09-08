@@ -4,6 +4,8 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import MY_PROJECTS from "@/data/projects";
 import type { Project } from "@/types/project";
+import ProjectPageTracker from "@/components/analytics/ProjectPageTracker";
+import TrackedExternalLink from "@/components/analytics/TrackedExternalLink";
 
 const BASE_URL = "https://www.swayam.cyou";
 
@@ -218,6 +220,7 @@ export default async function ProjectPage({ params }: Props) {
 
   return (
     <>
+      <ProjectPageTracker slug={project.slug} title={project.title} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
@@ -360,10 +363,9 @@ export default async function ProjectPage({ params }: Props) {
               {/* Action links below the mockup */}
               <div className="flex items-center gap-4 mt-4">
                 {project.link && (
-                  <a
+                  <TrackedExternalLink
                     href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    itemId="live_demo"
                     className="flex-1 text-center font-['Bebas_Neue'] tracking-[0.16em] no-underline transition-all duration-200
                       border-[1.5px] border-[var(--yale-blue)] text-[var(--yale-blue)]
                       hover:bg-[var(--yale-blue)] hover:text-[var(--frozen-water)]
@@ -371,13 +373,12 @@ export default async function ProjectPage({ params }: Props) {
                     style={{ fontSize: "0.82rem" }}
                   >
                     View Live ↗
-                  </a>
+                  </TrackedExternalLink>
                 )}
                 {project.repo && (
-                  <a
+                  <TrackedExternalLink
                     href={project.repo}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    itemId="repo"
                     className="flex-1 text-center font-['Bebas_Neue'] tracking-[0.16em] no-underline transition-all duration-200
                       border-[1.5px] border-[var(--fresh-sky)] text-[var(--fresh-sky)]
                       hover:bg-[var(--fresh-sky)] hover:text-[var(--yale-blue)]
@@ -385,7 +386,7 @@ export default async function ProjectPage({ params }: Props) {
                     style={{ fontSize: "0.82rem" }}
                   >
                     View Repo ↗
-                  </a>
+                  </TrackedExternalLink>
                 )}
               </div>
             </div>

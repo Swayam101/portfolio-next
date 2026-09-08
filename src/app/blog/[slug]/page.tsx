@@ -6,6 +6,7 @@ import {
 } from "@/features/blog/db";
 import { BlogPage } from "@/features/blog/components/BlogPage";
 import type { Metadata } from "next";
+import BlogPageTracker from "@/components/analytics/BlogPageTracker";
 
 import "../../blog.css";
 
@@ -99,6 +100,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
+      <BlogPageTracker slug={slug} title={post.BLOG_TITLE} seriesSlug={post.seriesSlug} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
