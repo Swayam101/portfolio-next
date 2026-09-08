@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { scrollToSection } from "../utils/scrollToSection";
 import { SOCIAL_LINKS } from "../constants/socialLinks";
+import { trackMixpanel } from "@/lib/mixpanel";
 import C from "../constants/colors";
 
 function useMagnetic(strength = 0.38) {
@@ -31,17 +32,21 @@ function SocialBtn({ href, label, children }: { href: string; label: string; chi
   const [hov, setHov] = useState(false);
   
   const handleClick = () => {
-    // @ts-ignore
+    // GA4
     if (typeof window !== 'undefined' && window.gtag) {
-      // @ts-ignore
       const linkType = label.toLowerCase();
-      // @ts-ignore
       window.gtag('event', 'select_content', {
         content_type: 'external_link',
         item_id: linkType,
         destination_url: href,
       });
     }
+
+    // Mixpanel
+    trackMixpanel('Click External Link', {
+      link_type: label.toLowerCase(),
+      destination: href,
+    });
   };
 
   return (

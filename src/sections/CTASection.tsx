@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import BounceInScale from "../components/ui/BounceInScale";
 import { scrollToSection } from "../utils/scrollToSection";
+import { trackMixpanel } from "@/lib/mixpanel";
 
 const CTASection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -71,14 +72,21 @@ const CTASection: React.FC = () => {
             onClick={(e) => { 
               e.preventDefault(); 
               scrollToSection("contact-form");
-              // @ts-ignore
+              
+              // GA4
               if (typeof window !== 'undefined' && window.gtag) {
-                // @ts-ignore
                 window.gtag('event', 'generate_lead', {
                   cta_text: 'Hit Me Up',
                   cta_location: 'hero_section',
                 });
               }
+
+              // Mixpanel
+              trackMixpanel('Generate Lead', {
+                source: 'cta',
+                cta_text: 'Hit Me Up',
+                cta_location: 'hero_section',
+              });
             }}
             className="text-2xl font-black tracking-wide rounded-xl px-6 py-4
               bg-[var(--pale-sky)]

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import BounceInScale from "../components/ui/BounceInScale";
+import { trackMixpanel } from "@/lib/mixpanel";
 
 export default function ContactFormSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -40,15 +41,21 @@ export default function ContactFormSection() {
       if (res.ok) {
         setStatus("success");
         setFormData({ name: "", email: "", message: "" });
-        // Track lead generation
-        // @ts-ignore
+        
+        // Track lead generation - GA4
         if (typeof window !== 'undefined' && window.gtag) {
-          // @ts-ignore
           window.gtag('event', 'generate_lead', {
             form_id: 'contact_form',
             form_name: 'Portfolio Contact',
           });
         }
+
+        // Track lead generation - Mixpanel
+        trackMixpanel('Generate Lead', {
+          source: 'form',
+          form_id: 'contact_form',
+          form_name: 'Portfolio Contact',
+        });
       } else {
         setStatus("error");
       }
