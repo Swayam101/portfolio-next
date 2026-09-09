@@ -24,6 +24,13 @@ export const metadata: Metadata = {
     "software engineer",
   ],
   authors: [{ name: "Swayam" }],
+  creator: "Swayam Prajapat",
+  publisher: "Swayam Prajapat",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
     type: "website",
     title: "Full-Stack Developer — Web, Mobile & Backend | Swayam",
@@ -58,6 +65,24 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/favicon.ico",
   },
+  manifest: "/manifest.json",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "your-google-verification-code",
+    yandex: "your-yandex-verification-code",
+    // Add your verification codes after getting them from search consoles
+  },
+  category: "technology",
 };
 
 const personJsonLd = {
