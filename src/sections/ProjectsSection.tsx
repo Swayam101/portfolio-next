@@ -17,8 +17,8 @@ interface ProjectsSectionProps {
 
 export default function ProjectsSection({
   projects = MY_PROJECTS,
-  heading = "Craft Highlights",
-  subheading = "Independent work. Enterprise standards.",
+  heading = "My Work",
+  subheading = "Recent projects",
 }: ProjectsSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
@@ -57,7 +57,7 @@ export default function ProjectsSection({
     <section
       id="projects"
       ref={sectionRef}
-      className="w-full relative overflow-hidden bg-[var(--frozen-water)] mt-72 px-6 sm:px-44"
+      className="w-full relative overflow-hidden bg-[var(--frozen-water)] mt-24 px-6 sm:px-44"
     >
       {/* Subtle wave texture */}
       <div

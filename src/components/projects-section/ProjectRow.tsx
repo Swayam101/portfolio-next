@@ -2,7 +2,6 @@ import { memo } from "react";
 import Link from "next/link";
 import type { Project } from "../../types/project";
 import { useScramble } from "../../hooks/useScramble";
-import { ProjectIconArrow } from "./ProjectIconArrow";
 
 interface ProjectRowProps {
   project: Project;
@@ -22,11 +21,12 @@ export const ProjectRow = memo(function ProjectRow({
   const scrambled = useScramble(project.title, isActive);
 
   return (
-    <div
+    <Link
+      href={project.slug ? `/projects/${project.slug}` : "#"}
       data-row
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
-      className="relative cursor-default ease-out border-t-[1.5px] border-t-[rgba(var(--pacific-blue-rgb),0.33)] transition-[background] duration-[350ms]"
+      className="relative block no-underline cursor-pointer ease-out border-t-[1.5px] border-t-[rgba(var(--pacific-blue-rgb),0.33)] transition-all duration-[350ms] hover:scale-[1.01]"
       style={{
         background: isActive ? "var(--pale-sky)" : "transparent",
       }}
@@ -64,17 +64,7 @@ export const ProjectRow = memo(function ProjectRow({
                 color: isActive ? "var(--yale-blue)" : "rgba(var(--yale-blue-rgb),0.73)",
               }}
             >
-              {project.slug ? (
-                <Link
-                  href={`/projects/${project.slug}`}
-                  className="no-underline hover:underline"
-                  style={{ color: "inherit" }}
-                >
-                  {scrambled}
-                </Link>
-              ) : (
-                scrambled
-              )}
+              {scrambled}
             </h3>
             <span className="font-['Lora'] text-[0.76rem] italic text-[var(--fresh-sky)] shrink-0">
               {project.year}
@@ -101,7 +91,7 @@ export const ProjectRow = memo(function ProjectRow({
 
           {/* Tags */}
           <div className="flex flex-wrap gap-[0.35rem]">
-            {project.tags.map((tag) => (
+            {project.tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
                 className="font-['Bebas_Neue'] text-[0.7rem] tracking-[0.12em] px-[0.55rem] py-[0.18rem] rounded-[2px] transition-all duration-[250ms] ease-out"
@@ -117,29 +107,30 @@ export const ProjectRow = memo(function ProjectRow({
           </div>
         </div>
 
-        {/* Links — wraps to next line on mobile when space is tight */}
+        {/* Arrow indicator on hover */}
         <div
-          className="flex items-center gap-[1.1rem] shrink-0 basis-full sm:basis-auto pt-2 transition-all duration-350"
+          className="flex items-center shrink-0 pt-2 transition-all duration-350"
           style={{
             opacity: isActive ? 1 : 0,
-            transform: isActive ? "translateX(0)" : "translateX(10px)",
+            transform: isActive ? "translateX(0)" : "translateX(-10px)",
             transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)",
           }}
         >
-          {project.link && (
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="font-['Bebas_Neue'] text-[0.75rem] tracking-[0.18em] text-[var(--yale-blue)] no-underline flex items-center gap-[0.3rem]"
-            >
-              LIVE <ProjectIconArrow color="var(--yale-blue)" />
-            </a>
-          )}
-     
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="var(--yale-blue)" 
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
         </div>
       </div>
-    </div>
+    </Link>
   );
 });

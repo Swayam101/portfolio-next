@@ -1,8 +1,48 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ScrollReveal from "../components/ui/ScrollReveal";
+
+// Real images from your portfolio
+const IMAGES = {
+  astronaut: "/astronaut.webp",
+  satellite: "/satellite.webp",
+  cta: "/cta.webp",
+};
+
+type Skill = {
+  title: string;
+  icon: string;
+  points: string[];
+};
+
+const SKILLS: Skill[] = [
+  { title: "Web", icon: "🌐", points: ["Interfaces", "Products"] },
+  { title: "Backend", icon: "⚙️", points: ["APIs", "Systems"] },
+  { title: "AI", icon: "🤖", points: ["Agents", "Models"] },
+  { title: "Automation", icon: "⚡", points: ["Workflows", "Things-that-do-things"] },
+];
+
+function SkillCard({ skill }: { skill: Skill }) {
+  return (
+    <div className="border-2 border-[var(--pacific-blue)] rounded-lg p-5 bg-white/40 backdrop-blur-sm">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="text-2xl">{skill.icon}</div>
+        <h3 className="font-display font-bold text-lg text-[var(--yale-blue)]">{skill.title}</h3>
+      </div>
+      <ul className="text-[var(--yale-blue)] text-sm space-y-1">
+        {skill.points.map((point) => (
+          <li key={point} className="flex gap-2">
+            <span>•</span>
+            {point}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 const GRADIENT_START = `
   conic-gradient(
@@ -29,28 +69,29 @@ const GRADIENT_END = `
   ) 50% / 80px 100%
 `;
 
-const AboutMeSection: React.FC = () => {
+export default function AboutMe() {
   const topGradientRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  const puppetRef = useRef<HTMLDivElement>(null);
+  const astronautRef = useRef<HTMLDivElement>(null);
+  const satelliteRef = useRef<HTMLDivElement>(null);
+  const personRef = useRef<HTMLDivElement>(null);
 
+  // Zigzag transition matching hero section
   useEffect(() => {
     const hero = document.getElementById("hero");
     const topEl = topGradientRef.current;
-    const overlay = overlayRef.current;
-    if (!hero || !topEl || !overlay) return;
+    if (!hero || !topEl) return;
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: hero,
         start: "top top",
-        end: "center top", // Complete before AboutMeSection gradients are in view
+        end: "center top",
         scrub: true,
       },
     });
 
-    // Phase 1: Light tint (matches hero overlay phase 1)
+    // Phase 1: Light tint
     tl.fromTo(
       [topEl],
       { background: GRADIENT_START },
@@ -58,7 +99,7 @@ const AboutMeSection: React.FC = () => {
       0
     );
 
-    // Phase 2: Darken to yale-blue (matches hero overlay phase 2)
+    // Phase 2: Darken to yale-blue
     tl.to(
       [topEl],
       { background: GRADIENT_END, duration: 1.4, ease: "none" },
@@ -68,112 +109,224 @@ const AboutMeSection: React.FC = () => {
     return () => tl.scrollTrigger?.kill();
   }, []);
 
-  // Katputli puppet: enter from right, leave — under 2s, triggered when section in view
+  // Image animations on scroll into view
   useEffect(() => {
     const section = sectionRef.current;
-    const puppet = puppetRef.current;
-    if (!section || !puppet) return;
+    const astronaut = astronautRef.current;
+    const satellite = satelliteRef.current;
+    const person = personRef.current;
+    
+    if (!section) return;
 
-    const tl = gsap.timeline({ paused: true });
-    tl.eventCallback("onComplete", () => { tl.pause(0); });
+    // Astronaut - fade in from left
+    if (astronaut) {
+      gsap.fromTo(
+        astronaut,
+        { x: -100, opacity: 0, rotation: -5 },
+        {
+          x: 0,
+          opacity: 1,
+          rotation: 0,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 70%",
+          },
+        }
+      );
+    }
 
-    const st = ScrollTrigger.create({
-      trigger: section,
-      start: "center 55%",
-      onEnter: () => tl.restart(),
-    });
+    // Satellite - fade in from top-right
+    if (satellite) {
+      gsap.fromTo(
+        satellite,
+        { x: 50, y: -50, opacity: 0, rotation: 10 },
+        {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          rotation: 0,
+          duration: 1,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 70%",
+          },
+        }
+      );
+    }
 
-    // Enter from right (0.5s) — slight bob, pivot at stick (right)
-    tl.fromTo(
-      puppet,
-      { x: "120%", rotation: -4, opacity: 0 },
-      {
-        x: "0%",
-        rotation: 2,
-        opacity: 1,
-        duration: 0.2,
-        ease: "back.out(1.2)",
-      }
-    )
-      // Brief hold + micro-bob (0.3s)
-      .to(puppet, { rotation: -1.5, duration: 0.5, yoyo: true, repeat: 1 })
-      // Leave to right (0.5s)
-      .to(puppet, {
-        x: "130%",
-        rotation: 4,
-        opacity: 0,
-        duration: 0.2,
-        ease: "back.in(1.1)",
-      });
-
-    return () => st.kill();
+    // Person - fade in from bottom-right
+    if (person) {
+      gsap.fromTo(
+        person,
+        { x: 50, y: 50, opacity: 0, rotation: -8 },
+        {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          rotation: 0,
+          duration: 1.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 70%",
+          },
+        }
+      );
+    }
   }, []);
 
   return (
-    <section id="about" ref={sectionRef} className="relative sm:py-24 py-12 text-center overflow-hidden px-6 sm:px-0">
+    <section ref={sectionRef} id="about" className="relative min-h-screen bg-[var(--frozen-water)] overflow-hidden">
+      {/* Zigzag top transition matching hero */}
       <div
         ref={topGradientRef}
         className="absolute top-0 left-0 w-full h-10"
         style={{ background: GRADIENT_START }}
       />
 
-      <div className="relative z-10 max-w-2xl mx-auto pt-24">
-        <ScrollReveal distance={40} duration={0.8} start="top 80%">
-          <h2 className="text-6xl font-bold text-[var(--yale-blue)] mb-4">
-            About Me
-          </h2>
-        </ScrollReveal>
-        <ScrollReveal distance={40} duration={0.8} delay={0.1} start="top 80%">
-          <p style={{fontWeight: 600}} className="text-4xl text-[var(--pacific-blue)] leading-[42px] sn-pro ">
-            I&apos;m <span className="text-[var(--yale-blue)]">Swayam</span> — I build software that works, and works fast.
-          </p>
-        </ScrollReveal>
-        <ScrollReveal distance={40} duration={0.8} delay={0.2} start="top 80%">
-          <p style={{fontWeight: 100}} className="sm:text-xl text-base text-[var(--yale-blue)] text-justify sn-pro py-8">
-            Full-stack freelancer with 3 years of experience building web software that&apos;s clean, fast, and built to last. I&apos;ve worked across the full stack — from pixel-perfect frontends to rock-solid backends — and I know what it takes to turn a rough idea into a product people actually use. I don&apos;t just write code, I think about the problem first, ask the right questions, and make sure what gets built is exactly what needs to exist.
-          </p>
-        </ScrollReveal>
-        <ScrollReveal distance={40} duration={0.8} delay={0.3} start="top 80%">
-          <p style={{fontWeight: 100}} className="sm:text-xl text-base text-[var(--yale-blue)] text-justify sn-pro">
-            My process is simple but the results aren&apos;t average. I cut the noise, skip the over-engineering, and ship with the kind of attention to craft most developers save for their own side projects. Whether it&apos;s a product starting from a blank file or an existing system that needs serious untangling, I bring the same focus and care every single time. Clean architecture, sharp execution, zero unnecessary back-and-forth.
-          </p>
-        </ScrollReveal>
-        <div
-          ref={overlayRef}
-          className="absolute inset-0 pointer-events-none z-[5]"
-          style={{ opacity: 0, backgroundColor: "transparent" }}
+      {/* Left - Big Astronaut */}
+      <div
+        ref={astronautRef}
+        className="absolute left-4 md:left-8 top-1/3 -translate-y-1/3 w-64 md:w-80 lg:w-96 z-10"
+        style={{ opacity: 0 }}
+      >
+        <Image
+          src={IMAGES.astronaut}
+          alt="Astronaut illustration"
+          width={400}
+          height={400}
+          className="w-full h-auto object-contain drop-shadow-lg"
         />
       </div>
 
-      {/* Katputli puppet: horizontal wooden stick on right + pointing character — enters from right, leaves */}
+      {/* Right Top - Satellite */}
       <div
-        ref={puppetRef}
-        className="absolute right-[6%] top-1/2 -translate-y-1/2 z-20 pointer-events-none"
-        style={{
-          transformOrigin: "right center",
-          width: "clamp(280px, 38vw, 480px)",
-        }}
+        ref={satelliteRef}
+        className="absolute right-6 md:right-12 top-24 md:top-32 w-32 md:w-40 lg:w-48 z-10"
+        style={{ opacity: 0 }}
       >
-        <div className="relative flex items-center">
-          <Image
-            src="/pointing.webp"
-            alt="Katputli puppet character pointing at About Me section — Swayam full-stack developer"
-            width={480}
-            height={480}
-            className="w-full h-auto object-contain"
-          />
-          {/* Wooden stick attached to right of character */}
-          <div
-            className="absolute left-full top-1/2 -translate-y-1/2 w-48 h-7 rounded-full"
-            style={{
-              background: "linear-gradient(180deg, #5c4033 0%, #3d2817 30%, #2d1f12 50%, #3d2817 70%, #5c4033 100%)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3)",
-            }}
-          />
-        </div>
+        <Image
+          src={IMAGES.satellite}
+          alt="Satellite illustration"
+          width={200}
+          height={200}
+          className="w-full h-auto object-contain drop-shadow-md"
+        />
       </div>
+
+      {/* Right Bottom - Person/CTA */}
+      <div
+        ref={personRef}
+        className="absolute right-6 md:right-12 bottom-32 md:bottom-40 w-40 md:w-48 lg:w-56 z-10"
+        style={{ opacity: 0 }}
+      >
+        <Image
+          src={IMAGES.cta}
+          alt="Character illustration"
+          width={250}
+          height={250}
+          className="w-full h-auto object-contain drop-shadow-md"
+        />
+      </div>
+
+      {/* Sparkles */}
+      <div className="absolute top-24 left-1/4 text-[var(--pacific-blue)] text-xl select-none">✦</div>
+      <div className="absolute top-72 right-1/3 text-[var(--pacific-blue)] text-lg select-none hidden md:block">✦</div>
+      <div className="absolute bottom-48 left-1/3 text-[var(--pacific-blue)] text-lg select-none">✦</div>
+
+      {/* MAIN CONTENT */}
+      <main className="relative z-20 max-w-3xl mx-auto px-6 pt-20 md:pt-24 pb-20 text-center">
+        {/* Heading */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <span className="text-[var(--yale-blue)] text-2xl -rotate-6 hidden sm:inline">↝</span>
+          <h1 className="font-display font-extrabold text-[var(--yale-blue)] text-4xl md:text-6xl tracking-tight">
+            About Me
+          </h1>
+          <span className="text-[var(--yale-blue)] text-2xl rotate-6 hidden sm:inline">↜</span>
+        </div>
+
+        {/* ID card */}
+        <div className="relative mx-auto max-w-md mb-8">
+          <span className="absolute -left-8 top-1/3 text-[var(--fresh-sky)] text-2xl hidden md:inline">⚡</span>
+          <span className="absolute -right-8 top-1/3 text-[var(--fresh-sky)] text-2xl hidden md:inline">⚡</span>
+          <div className="bg-[var(--yale-blue)] rounded-xl border-2 border-[var(--pacific-blue)] px-6 py-5 shadow-lg relative">
+            <div className="absolute -top-2 left-8 w-4 h-4 bg-[var(--yale-blue)] rounded-sm border border-[var(--pacific-blue)]" />
+            <div className="absolute -top-2 right-16 w-4 h-4 bg-[var(--yale-blue)] rounded-sm border border-[var(--pacific-blue)]" />
+            <div className="absolute top-3 -right-1.5 w-3 h-8 bg-[var(--yale-blue)] rounded-sm border border-[var(--pacific-blue)]" />
+            <div className="absolute top-1 right-6 w-2 h-2 bg-[var(--pacific-blue)] rounded-full" />
+            <div className="divide-y divide-[var(--pacific-blue)]/40 text-left font-mono">
+              <p className="py-1.5 text-sm md:text-base tracking-wide text-[var(--frozen-water)]">HUMAN / DEVELOPER</p>
+              <p className="py-1.5 text-sm md:text-base tracking-wide text-[var(--pale-sky)] font-semibold">
+                SWAYAM PRAJAPAT
+              </p>
+              <p className="py-1.5 text-sm md:text-base tracking-wide text-[var(--frozen-water)]">
+                STATUS: BUILDING{" "}
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 align-middle ml-1" />
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Tagline */}
+        <p className="font-display text-xl md:text-2xl text-[var(--yale-blue)] font-semibold mb-1">
+          I make computers do useful things.
+        </p>
+        <svg className="mx-auto mb-10" width="180" height="12" viewBox="0 0 180 12">
+          <path
+            d="M2 6c15-8 30 8 45 0s30-8 45 0 30 8 45 0 30-8 40 0"
+            stroke="var(--pacific-blue)"
+            strokeWidth="2.5"
+            fill="none"
+            strokeLinecap="round"
+          />
+        </svg>
+
+        {/* Skill cards grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left mb-10">
+          {SKILLS.map((skill) => (
+            <SkillCard key={skill.title} skill={skill} />
+          ))}
+        </div>
+
+        {/* Current obsession */}
+        <div className="relative inline-block">
+          <span className="absolute -left-7 top-1/2 -translate-y-1/2 text-[var(--pacific-blue)] text-xl hidden sm:inline">
+            ↝
+          </span>
+          <span className="absolute -right-7 top-1/2 -translate-y-1/2 text-[var(--pacific-blue)] text-xl hidden sm:inline">
+            ↜
+          </span>
+          <div className="border-2 border-dashed border-[var(--pacific-blue)] rounded-full px-8 py-5 max-w-sm mx-auto">
+            <p className="flex items-center justify-center gap-2 font-display font-bold text-[var(--yale-blue)] text-sm mb-1">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6" stroke="var(--yale-blue)" strokeWidth="1.5" />
+                <circle cx="8" cy="8" r="1.5" fill="var(--yale-blue)" />
+              </svg>
+              CURRENT OBSESSION
+            </p>
+            <p className="text-[var(--yale-blue)] text-base">making software that works while I&apos;m not.</p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-col items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <path
+              d="M8 1v13M2 9l6 6 6-6"
+              stroke="var(--yale-blue)"
+              strokeWidth="1.6"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <div className="w-9 h-9 rounded-full bg-[var(--yale-blue)] flex items-center justify-center">
+            <span className="w-3 h-3 rounded-full border-2 border-[var(--pale-sky)]" />
+          </div>
+        </div>
+      </main>
     </section>
   );
-};
-
-export default AboutMeSection;
+}
