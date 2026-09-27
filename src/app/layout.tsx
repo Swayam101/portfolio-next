@@ -60,6 +60,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "https://www.swayam.cyou",
+    types: {
+      "text/markdown": "https://www.swayam.cyou/llms.txt",
+    },
   },
   icons: {
     icon: "/favicon.ico",
@@ -232,6 +235,12 @@ export default function RootLayout({
         />
         <link rel="preload" href="/astronaut.webp" as="image" />
         <link rel="preload" href="/isit2.webp" as="image" />
+        <link
+          rel="alternate"
+          type="text/markdown"
+          href="/llms.txt"
+          title="Agent Markdown Summary (llms.txt)"
+        />
         <Script
           id="google-analytics"
           strategy="afterInteractive"

@@ -13,7 +13,16 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, email, message } = body;
+    const { name, email, message, agentInvoked } = body;
+    const isAgent = Boolean(
+      agentInvoked ||
+      request.headers.get("x-agent-invoked") === "true" ||
+      request.headers.get("user-agent")?.toLowerCase().includes("agent")
+    );
+
+    if (isAgent) {
+      console.log(`[Agent Invocation] Automated contact transmission from: ${name} <${email}>`);
+    }
 
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
       return NextResponse.json(
@@ -22,15 +31,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Input bounds check to prevent payload flooding
+    if (name.length > 120 || email.length > 254 || message.length > 6000) {
+      return NextResponse.json(
+        { error: "Payload exceeds acceptable length limits" },
+        { status: 400 }
+      );
+    }
+
     const text = [
-      "📬 New contact form submission",
+      isAgent ? "🤖 [AI Agent] Contact submission" : "📬 New contact form submission",
       "",
       `Name: ${name.trim()}`,
       `Email: ${email.trim()}`,
+      isAgent ? `Source: WebMCP / Automated Agent` : "",
       "",
       "Message:",
       message.trim(),
-    ].join("\n");
+    ].filter(Boolean).join("\n");
 
     const res = await fetch(
       `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,

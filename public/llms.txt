@@ -1,0 +1,30 @@
+# Swayam Prajapat — Full-Stack Developer
+
+> Swayam Prajapat is a full-stack software developer with 3 years of professional experience building high-performance web software, scalable backends, and responsive user interfaces. Core technical strengths include React, Next.js, Node.js, TypeScript, and MongoDB.
+
+## Projects
+
+- [Fetchmate](https://www.swayam.cyou/projects/fetchmate): Two-sided pet care marketplace connecting owners with verified sitters. Features include real-time booking workflows, availability management, and Stripe payment processing. Built with Next.js, Node.js, MongoDB, and Stripe.
+- [ChatZapp](https://www.swayam.cyou/projects/chatzapp): High-concurrency real-time messaging application supporting instant message delivery, user channels, and responsive UI design.
+- [Eleve](https://www.swayam.cyou/projects/eleve): Modern web experience emphasizing fluid animations, responsive layouts, and clean interface aesthetics.
+
+## Writing & Articles
+
+- [A Box That Controls the World](https://www.swayam.cyou/blog/a-box-that-controls-the-world): Analysis of computing hardware, system architectures, and digital control mechanisms.
+- [Evolution of Computers Part 1](https://www.swayam.cyou/blog/evolution-of-computers-1): Historical and engineering overview of modern computing architecture.
+
+## Key Links & Navigation
+
+- [Home](https://www.swayam.cyou/): Portfolio homepage with overview, crafts, skills, and about sections.
+- [About Me](https://www.swayam.cyou/#about): Background, experience, and development philosophies.
+- [Projects](https://www.swayam.cyou/#projects): Complete list of featured crafts and applications.
+- [Blog](https://www.swayam.cyou/blog): Engineering and computer architecture articles.
+- [Contact Form](https://www.swayam.cyou/#contact-form): Send project inquiries, contract proposals, or messages directly.
+
+## Direct Contact & Profiles
+
+- Email: swayamprajapat21@gmail.com
+- GitHub: https://github.com/Swayam101
+- LinkedIn: https://www.linkedin.com/in/swayam-prajapat
+- Twitter / X: https://x.com/SPrajapat16530
+- Telegram: https://t.me/Sammy101X

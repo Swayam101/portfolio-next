@@ -19,7 +19,7 @@ export default function FloatingNav() {
   const [showOnDesktop, setShowOnDesktop] = useState(false);
   const isMobile = useHydrationSafeMediaQuery({ maxWidth: 767 });
   const backdropRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -177,10 +177,13 @@ export default function FloatingNav() {
         />
 
         {/* Sidebar panel — GSAP-animated slide */}
-        <aside
+        <div
           ref={sidebarRef}
           role="dialog"
+          aria-modal="true"
           aria-label="Navigation menu"
+          aria-hidden={!open}
+          inert={!open ? true : undefined}
           onKeyDown={(e) => {
             if (e.key === "Escape") setOpen(false);
           }}
@@ -282,7 +285,7 @@ export default function FloatingNav() {
               ))}
             </div>
           </div>
-        </aside>
+        </div>
       </div>
     </>
   );

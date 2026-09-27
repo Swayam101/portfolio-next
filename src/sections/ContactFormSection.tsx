@@ -30,6 +30,81 @@ export default function ContactFormSection() {
         },
       }
     );
+
+    // WebMCP Tool Registration (Imperative API - Chrome OT & ChatGPT Desktop)
+    // Security requirements:
+    // 1. Top-level window execution only (never in cross-origin iframes)
+    // 2. consequentialHint: true (sends communication externally)
+    // 3. untrustedContentHint: true (processes user-provided page text)
+    // 4. Binds to identical endpoint (/api/contact) used by human UI
+    if (typeof window !== "undefined" && window.self === window.top) {
+      const win = window as unknown as { modelContext?: { registerTool?: (tool: unknown) => void } };
+      const doc = document as unknown as { modelContext?: { registerTool?: (tool: unknown) => void } };
+      const nav = navigator as unknown as { modelContext?: { registerTool?: (tool: unknown) => void } };
+      const mc = doc.modelContext ?? nav.modelContext ?? win.modelContext;
+
+      if (mc?.registerTool) {
+        try {
+          mc.registerTool({
+            name: "send_contact_message",
+            description: "Send a direct message or project inquiry to Swayam Prajapat. Messages are forwarded straight to his inbox.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  description: "Full name of the sender",
+                },
+                email: {
+                  type: "string",
+                  description: "Sender's email address for follow-up reply",
+                },
+                message: {
+                  type: "string",
+                  description: "The project inquiry or message content",
+                },
+              },
+              required: ["name", "email", "message"],
+            },
+            annotations: {
+              consequentialHint: true,
+              untrustedContentHint: true,
+            },
+            async execute({ name, email, message }: { name: string; email: string; message: string }) {
+              const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-Agent-Invoked": "true",
+                },
+                body: JSON.stringify({ name, email, message, agentInvoked: true }),
+              });
+              const data = await res.json();
+              if (!res.ok) {
+                return {
+                  content: [
+                    {
+                      type: "text",
+                      text: `Error: ${data.error || "Failed to send message"}`,
+                    },
+                  ],
+                };
+              }
+              return {
+                content: [
+                  {
+                    type: "text",
+                    text: "Message successfully transmitted to Swayam's inbox. Expect a reply within 24 hours.",
+                  },
+                ],
+              };
+            },
+          });
+        } catch (e) {
+          console.debug("WebMCP registration note:", e);
+        }
+      }
+    }
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -96,6 +171,10 @@ export default function ContactFormSection() {
           onSubmit={handleSubmit}
           className="space-y-5"
           style={{ opacity: 0 }}
+          {...{
+            toolname: "send_contact_message",
+            tooldescription: "Send a direct message or project inquiry to Swayam Prajapat",
+          }}
         >
           {/* Name Input */}
           <div>
@@ -111,6 +190,7 @@ export default function ContactFormSection() {
               onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
               required
               disabled={status === "sending"}
+              {...{ toolparamdescription: "Sender's full name" }}
               className="w-full px-4 py-3.5 rounded-lg bg-white border-2 border-[var(--pacific-blue)]/20 
                 text-[var(--yale-blue)] placeholder:text-[var(--fresh-sky)]/50 
                 focus:border-[var(--pacific-blue)] focus:ring-2 focus:ring-[var(--pacific-blue)]/20 
@@ -132,6 +212,7 @@ export default function ContactFormSection() {
               onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
               required
               disabled={status === "sending"}
+              {...{ toolparamdescription: "Sender's email address for follow-up reply" }}
               className="w-full px-4 py-3.5 rounded-lg bg-white border-2 border-[var(--pacific-blue)]/20 
                 text-[var(--yale-blue)] placeholder:text-[var(--fresh-sky)]/50 
                 focus:border-[var(--pacific-blue)] focus:ring-2 focus:ring-[var(--pacific-blue)]/20 
@@ -142,7 +223,7 @@ export default function ContactFormSection() {
           {/* Message Input */}
           <div>
             <label htmlFor="message" className="block text-sm font-medium text-[var(--yale-blue)] mb-2 sn-pro">
-              What's on your mind?
+              What&apos;s on your mind?
             </label>
             <textarea
               id="message"
@@ -153,6 +234,7 @@ export default function ContactFormSection() {
               required
               rows={5}
               disabled={status === "sending"}
+              {...{ toolparamdescription: "Detailed project inquiry or message" }}
               className="w-full px-4 py-3.5 rounded-lg bg-white border-2 border-[var(--pacific-blue)]/20 
                 text-[var(--yale-blue)] placeholder:text-[var(--fresh-sky)]/50 
                 focus:border-[var(--pacific-blue)] focus:ring-2 focus:ring-[var(--pacific-blue)]/20 
@@ -193,7 +275,7 @@ export default function ContactFormSection() {
           {status === "success" && (
             <div className="p-4 rounded-lg bg-emerald-50 border-2 border-emerald-200 text-center">
               <p className="text-emerald-700 font-medium sn-pro">
-                ✓ Message received! I'll get back to you soon.
+                ✓ Message received! I&apos;ll get back to you soon.
               </p>
             </div>
           )}

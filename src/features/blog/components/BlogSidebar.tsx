@@ -44,6 +44,7 @@ function DesktopSidebar({ toc }: { toc: SidebarTOCItem[] }) {
     <aside
       className="hidden lg:block w-[210px] shrink-0 pl-8 py-10 sticky top-8 self-start"
       style={{ borderLeft: "1px solid #b8dede" }}
+      aria-label="Table of contents"
     >
       <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-[#5bbfbf] block mb-3">
         Contents

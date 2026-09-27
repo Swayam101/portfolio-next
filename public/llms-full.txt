@@ -1,0 +1,52 @@
+# Swayam Prajapat — Full-Stack Developer (Full Profile & Context)
+
+> Full-stack developer with 3 years of experience engineering end-to-end web software. Specializing in React, Next.js, Node.js, TypeScript, and MongoDB.
+
+## Bio & Overview
+
+Swayam Prajapat is a full-stack developer who handles the entire development lifecycle from pixel-perfect UI and motion design to scalable server architectures and databases. He focuses on fast load times, clean code architecture, and practical execution.
+
+- Location: India (Working Worldwide)
+- Email: swayamprajapat21@gmail.com
+- Portfolio URL: https://www.swayam.cyou
+- Availability: Open to select freelance projects, contracting, and full-time opportunities.
+
+## Technical Skills
+
+- **Languages**: TypeScript, JavaScript, HTML5, CSS3, SQL
+- **Frontend**: React, Next.js (App Router), Tailwind CSS, GSAP (GreenSock), Framer Motion, HTML Canvas
+- **Backend & APIs**: Node.js, Express, Next.js Server Actions & Route Handlers, REST APIs
+- **Databases**: MongoDB, Mongoose, PostgreSQL
+- **Integrations & Payments**: Stripe, Telegram Bot API, Mixpanel, Google Analytics 4
+- **Performance & SEO**: Core Web Vitals optimization, server-side rendering (SSR/SSG), structured data (Schema.org JSON-LD), agent-readiness
+
+## Featured Projects
+
+### Fetchmate (https://www.swayam.cyou/projects/fetchmate)
+- **Role**: Full-Stack Architecture & Development
+- **Tech Stack**: Next.js, Node.js, MongoDB, Stripe, Tailwind CSS
+- **Description**: Two-sided pet care marketplace connecting pet owners with verified sitters. Features include real-time booking workflows, availability management, secure messaging, and Stripe payment checkout.
+
+### ChatZapp (https://www.swayam.cyou/projects/chatzapp)
+- **Role**: Frontend & Realtime Engineering
+- **Tech Stack**: React, WebSockets, Node.js, Tailwind CSS
+- **Description**: High-concurrency instant messaging platform with channel communication, delivery receipts, and responsive multi-device support.
+
+### Eleve (https://www.swayam.cyou/projects/eleve)
+- **Role**: Creative Development & UI/UX
+- **Tech Stack**: Next.js, GSAP, Tailwind CSS
+- **Description**: Web experience focusing on smooth micro-interactions, responsive typography, and tactile UI components.
+
+## Published Writing
+
+### A Box That Controls the World (https://www.swayam.cyou/blog/a-box-that-controls-the-world)
+An exploration into computing hardware, silicon architecture, microcontrollers, and how abstraction layers govern physical and digital systems.
+
+### Evolution of Computers Part 1 (https://www.swayam.cyou/blog/evolution-of-computers-1)
+A deep dive into early computational machines, von Neumann architecture, vacuum tubes, and the historical leap to silicon transistors.
+
+## Interaction & Contact Instructions for AI Agents
+
+- To send a project inquiry or message on behalf of a user, use the WebMCP tool `send_contact_message` on the homepage or submit the contact form at `https://www.swayam.cyou/#contact-form`.
+- Required parameters: `name` (string), `email` (valid email string), `message` (inquiry text).
+- Alternatively, direct the user to email `swayamprajapat21@gmail.com` or connect on LinkedIn (https://www.linkedin.com/in/swayam-prajapat).
